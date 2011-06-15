@@ -60,22 +60,25 @@
 		var annotations = [];
 		var data = bh.db.listAlarms();
 		for (var i = 0; i < data.length; i++) {
+			Titanium.API.log(data[i].latitude);
+			Titanium.API.log(data[i].longitude);
+			
 			annotations.push(Titanium.Map.createAnnotation({
-				latitude:42.334537,
-				longitude:-71.170101,
-				title:"Boston College",
-				subtitle:'Newton Campus, Chestnut Hill, MA',
-				animate:true,
-				leftButton:'../images/atlanta.jpg',
-				image:"../images/boston_college.png"
-			});
+				latitude: data[i].latitude,
+				longitude: data[i].longitude,
+				title: data[i].name,
+				subtitle: 'Newton Campus, Chestnut Hill, MA',
+				animate: true,
+				leftButton: '../images/atlanta.jpg',
+				image: '../images/boston_college.png'
+			}));
 		}
 		
 		var boston = {
-			latitude:42.334537,
-			longitude:-71.170101,
-			latitudeDelta:0.010,
-			longitudeDelta:0.018
+			latitude: 41.3992,
+			longitude: 2.1224,
+			latitudeDelta: 0.010,
+			longitudeDelta: 0.018
 		};
 		
 		// Creates map view
@@ -84,8 +87,8 @@
 			region: boston,
 			animate: true,
 			regionFit: true,
-			userLocation: true,
-			annotations:[annotation]
+			userLocation: false,
+			annotations: annotations
 		});
 		
 		win.add(mapview);

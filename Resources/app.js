@@ -12,6 +12,7 @@ Ti.include('library/version.js');
 var tabs = bh.ui.createApplicationTabGroup();
 tabs.open();
 
+/*
 if (isiOS4Plus())
 {
 	// register a background service. this JS will run when the app is backgrounded
@@ -37,7 +38,7 @@ if (isiOS4Plus())
 		Ti.API.info("app was paused from the foreground");
 	});
 }
-
+*/
 
 //Log our current platform to the console
 Ti.API.info('Welcome to FiveMinutesMore for ' + Ti.Platform.osname);

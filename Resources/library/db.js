@@ -3,6 +3,7 @@
 
 	// Bootstraps the database
 	Ti.include('/library/bootstrap/db.js');
+	Ti.include('/library/packs/bcn.js');
 
 	// Alarms Package
     bh.db.listAlarms = function() {
@@ -16,7 +17,9 @@
                 id: result.fieldByName('id'), //custom data attribute to pass to detail page
                 leftImage: 'images/mini-icons/03-clock.png',
                 //add actual db fields
-                name: result.fieldByName('name')
+                name: result.fieldByName('name'),
+                latitude: result.fieldByName('longitude'),
+                longitude: result.fieldByName('latitude')
             });
             result.next();
         }
