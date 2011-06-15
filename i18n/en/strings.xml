@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+    <string name="alarms">Alarms</string>
+    <string name="lines">Lines</string>
+    <string name="stops">Stops</string>
+    <string name="add">Add</string>
+    <string name="map">Map</string>
+    <string name="options">Options</string>
+</resources>
