@@ -6,6 +6,7 @@
     
     bh.ui.tabGroup = null;
     bh.ui.alarmsTab = null;
+    bh.ui.mapView = null;
     
     bh.ui.createAlarmsWindow = function() {
         var win = Titanium.UI.createWindow({
@@ -20,11 +21,11 @@
         });
 
         var edit = Titanium.UI.createButton({
-            title : 'Edit'
+            title : L('edit')
         });
 
         var cancel = Titanium.UI.createButton({
-            title : 'Cancel',
+            title : L('cancel'),
             style : Titanium.UI.iPhone.SystemButtonStyle.DONE
         });
 
@@ -56,42 +57,143 @@
         var win = Titanium.UI.createWindow({
             title : L('map')
         });
-
-		var annotations = [];
-		var data = bh.db.listAlarms();
-		for (var i = 0; i < data.length; i++) {
-			Titanium.API.log(data[i].latitude);
-			Titanium.API.log(data[i].longitude);
-			
-			annotations.push(Titanium.Map.createAnnotation({
-				latitude: data[i].latitude,
-				longitude: data[i].longitude,
-				title: data[i].name,
-				subtitle: 'Newton Campus, Chestnut Hill, MA',
-				animate: true,
-				leftButton: '../images/atlanta.jpg',
-				image: '../images/boston_college.png'
-			}));
-		}
 		
-		var boston = {
-			latitude: 41.3992,
-			longitude: 2.1224,
-			latitudeDelta: 0.010,
-			longitudeDelta: 0.018
+		var userRegion = {
+			latitude: bh.coords.latitude,
+			longitude: bh.coords.longitude,
+			latitudeDelta: 0.01,
+			longitudeDelta: 0.01
 		};
-		
+
 		// Creates map view
-		var mapview = Titanium.Map.createView({
+		bh.ui.mapView = Titanium.Map.createView({
 			mapType: Titanium.Map.STANDARD_TYPE,
-			region: boston,
+			region: userRegion,
 			animate: true,
 			regionFit: true,
-			userLocation: false,
-			annotations: annotations
+			userLocation: true
 		});
 		
-		win.add(mapview);
+		bh.ui.annotations = [];
+				
+		function populateAnnotations() {
+			var data = bh.db.listAlarms();
+			
+			// Remove annotations
+			bh.ui.mapView.removeAllAnnotations();
+			bh.ui.annotations = [];
+
+			for (var i = 0; i < data.length; i++) {
+				if (data[i].latitude && data[i].longitude) {
+					Titanium.API.log(data[i].latitude + ', ' + data[i].longitude);
+					var newAnnotation = Titanium.Map.createAnnotation({
+						latitude: data[i].latitude,
+						longitude: data[i].longitude,
+						title: data[i].name,
+						subtitle: data[i].latitude + ',' + data[i].longitude,
+						animate: true,
+						leftButton: 'images/mini-icons/03-clock.png'
+					});
+					
+					bh.ui.annotations.push(newAnnotation);
+					bh.ui.mapView.addAnnotation(newAnnotation);
+				}
+			}
+		}
+		
+        Ti.App.addEventListener('databaseUpdatedNew', populateAnnotations);
+		populateAnnotations();
+
+        var center = Titanium.UI.createButton({
+            title : L('center'),
+            style : Titanium.UI.iPhone.SystemButtonStyle.PLAIN
+        });
+        center.addEventListener('click', function() {
+			bh.ui.mapView.setLocation(Qpqp.Map.getCenterRegion(bh.ui.annotations));
+        });
+        win.setRightNavButton(center);
+
+		// button to change to ATL
+		atl = Titanium.UI.createButton({
+			style:Titanium.UI.iPhone.SystemButtonStyle.BORDERED,
+			title:'ATL'
+		});
+		
+		// activate annotation
+		if (bh.ui.annotations.length > 0) {
+			bh.ui.mapView.selectAnnotation(bh.ui.annotations[0].title, true);
+		}
+		
+		// button to change to SV	
+		sv = Titanium.UI.createButton({
+			style:Titanium.UI.iPhone.SystemButtonStyle.BORDERED,
+			title:'SV'
+		});
+		
+		bh.ui.mapView.addEventListener('complete', function()
+		{
+			Ti.API.info("map has completed loaded region");
+		});
+		
+		var flexSpace = Titanium.UI.createButton({
+			systemButton:Titanium.UI.iPhone.SystemButton.FLEXIBLE_SPACE
+		});
+		
+		// button to change map type to SAT
+		sat = Titanium.UI.createButton({
+			title:'Sat',
+			style:Titanium.UI.iPhone.SystemButtonStyle.BORDERED
+		});
+		// button to change map type to STD
+		std = Titanium.UI.createButton({
+			title:'Std',
+			style:Titanium.UI.iPhone.SystemButtonStyle.BORDERED
+		});
+		// button to change map type to HYBRID
+		hyb = Titanium.UI.createButton({
+			title:'Hyb',
+			style:Titanium.UI.iPhone.SystemButtonStyle.BORDERED
+		});
+		// button to zoom-in
+		zoomin = Titanium.UI.createButton({
+			title:'+',
+			style:Titanium.UI.iPhone.SystemButtonStyle.BORDERED
+		});
+		// button to zoom-out
+		zoomout = Titanium.UI.createButton({
+			title:'-',
+			style:Titanium.UI.iPhone.SystemButtonStyle.BORDERED
+		});
+	
+		var wireClickHandlers = function() {
+			
+			sat.addEventListener('click',function() {
+				// set map type to satellite
+				bh.ui.mapView.setMapType(Titanium.Map.SATELLITE_TYPE);
+			});
+			
+			std.addEventListener('click',function() {
+				// set map type to standard
+				bh.ui.mapView.setMapType(Titanium.Map.STANDARD_TYPE);
+			});
+			
+			hyb.addEventListener('click',function() {
+				// set map type to hybrid
+				bh.ui.mapView.setMapType(Titanium.Map.HYBRID_TYPE);
+			});
+			
+			zoomin.addEventListener('click',function() {
+				bh.ui.mapView.zoom(1);
+			});
+			
+			zoomout.addEventListener('click',function() {
+				bh.ui.mapView.zoom(-1);
+			});
+		};
+		wireClickHandlers();
+		win.setToolbar([std,hyb,sat,flexSpace,zoomin,zoomout]);
+		win.add(bh.ui.mapView);
+
         return win;
     };
 
@@ -101,7 +203,7 @@
         });
         
         var b = Titanium.UI.createButton({
-            title : 'Close',
+            title : L('close'),
             style : Titanium.UI.iPhone.SystemButtonStyle.PLAIN
         });
         b.addEventListener('click', function() {
@@ -131,7 +233,6 @@
         }
         Ti.App.addEventListener('databaseUpdated', populateData);
 
-        // run initial query
         populateData();
 
         return tv;
@@ -225,17 +326,8 @@
             window : map
         });
 
-		/*
-        bh.ui.optionsTab = Titanium.UI.createTab({
-            icon : 'images/icons/20-gear2@2x.png',
-            title : L('options'),
-            window : options
-        });
-        */
-        
         tabGroup.addTab(bh.ui.alarmsTab);
         tabGroup.addTab(bh.ui.mapTab);
-        // tabGroup.addTab(bh.ui.optionsTab);
 
         return tabGroup;
     };

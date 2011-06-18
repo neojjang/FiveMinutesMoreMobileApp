@@ -6,7 +6,7 @@ db.execute('CREATE TABLE IF NOT EXISTS categories (id INTEGER, name TEXT, descri
 db.execute('DELETE FROM categories');
 
 // Areas Table
-db.execute('CREATE TABLE IF NOT EXISTS areas (id INTEGER, name TEXT, longitude REAL, latitude REAL)');
+db.execute('CREATE TABLE IF NOT EXISTS areas (id INTEGER, name TEXT, latitude REAL, longitude REAL)');
 db.execute('DELETE FROM areas');
 
 // Link Table

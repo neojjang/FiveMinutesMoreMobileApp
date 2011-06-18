@@ -18,8 +18,8 @@
                 leftImage: 'images/mini-icons/03-clock.png',
                 //add actual db fields
                 name: result.fieldByName('name'),
-                latitude: result.fieldByName('longitude'),
-                longitude: result.fieldByName('latitude')
+                latitude: result.fieldByName('latitude'),
+                longitude: result.fieldByName('longitude')
             });
             result.next();
         }
@@ -36,6 +36,7 @@
 
 		//Dispatch a message to let others know the database has been updated
 		Ti.App.fireEvent('databaseUpdated');
+		Ti.App.fireEvent('databaseUpdatedNew');
 	};
 
 	bh.db.deleteAlarm = function(_id, _notify) {
@@ -44,6 +45,7 @@
 		db.close();
 
 		//Dispatch a message to let others know the database has been updated
+		Ti.App.fireEvent('databaseUpdatedNew');
 		if (_notify) {
 			Ti.App.fireEvent('databaseUpdated');
 		}
