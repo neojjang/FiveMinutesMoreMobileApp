@@ -34,7 +34,7 @@
             alarmsList.push({
                 //add these attributes for the benefit of a table view
                 title: result.fieldByName('name'),
-                id: result.fieldByName('id'), //custom data attribute to pass to detail page
+                id: result.fieldByName('id'),
                 leftImage: 'images/areas/fgc.png',
                 //add actual db fields
                 name: result.fieldByName('name'),

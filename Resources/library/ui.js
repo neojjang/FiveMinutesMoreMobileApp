@@ -71,9 +71,9 @@
 		bh.ui.mapView = Titanium.Map.createView({
 			mapType: Titanium.Map.STANDARD_TYPE,
 			region: userRegion,
-			animate: false,
+			animate: true,
 			regionFit: false,
-			userLocation: false
+			userLocation: true
 		});
 		
 		bh.ui.annotations = [];
@@ -87,12 +87,11 @@
 
 			for (var i = 0; i < data.length; i++) {
 				if (data[i].latitude && data[i].longitude) {
-					Titanium.API.log(data[i].latitude + ', ' + data[i].longitude);
 					var newAnnotation = Titanium.Map.createAnnotation({
 						latitude: data[i].latitude,
 						longitude: data[i].longitude,
 						title: data[i].name,
-						animate: false,
+						animate: true,
 						leftButton: 'images/areas/fgc.png'
 					});
 					
@@ -126,7 +125,9 @@
 
 		var centerOnUser = Titanium.UI.createButton({
 			style: Titanium.UI.iPhone.SystemButtonStyle.BORDERED,
-			image: 'images/symbols/30-circle-in.png'
+			image: 'images/mini-icons/30-circle-in.png',
+			width: 30,
+			height: 30
 		});
 		
         centerOnUser.addEventListener('click', function() {
@@ -135,7 +136,9 @@
 
 		var centerOnAnnotations = Titanium.UI.createButton({
 			style: Titanium.UI.iPhone.SystemButtonStyle.BORDERED,
-			image: 'images/symbols/29-circle-out.png'
+			image: 'images/mini-icons/29-circle-out.png',
+			width: 30,
+			height: 30
 		});
 		
         centerOnAnnotations.addEventListener('click', function() {
@@ -147,7 +150,7 @@
 			bh.ui.mapView.setLocation(Qpqp.Map.getCenterRegion(localAnnotations));
         });
 		
-		win.setToolbar([centerOnUser, centerOnAnnotations, flexSpace]);
+		win.setToolbar([centerOnUser, centerOnAnnotations]);
 		win.add(bh.ui.mapView);
 
         return win;
