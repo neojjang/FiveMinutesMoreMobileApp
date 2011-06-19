@@ -1,40 +1,18 @@
-/**
- * this is a background service and this code will run *every* time the 
- * application goes into the foreground
- */
-Ti.API.info("hello from a background service");
+var bh = {};
 
-var notification = Ti.App.iOS.scheduleLocalNotification({
-	alertBody:"Wake up, Neo...",
-	alertAction:"View",
-	sound:"pop.caf",
-	date:new Date(new Date().getTime() + 3000) // 3 seconds after backgrounding
-});
+// Database 
+Ti.include('/library/db.js');
 
-// we cancel our notification if we don't want it to continue
-// notification.cancel(); 
+// Tools
+Ti.include('library/qpqp.js');
 
-Ti.App.iOS.addEventListener('notification',function(){
-	Ti.API.info('background event received = '+notification);
-	Ti.App.currentService.unregister();
-});
-
-Ti.App.currentService.addEventListener('stop',function()
-{
-	Ti.API.info("background service is stopped");
-});
-
-// we need to explicitly stop the service or it will continue to run
-// you should only stop it if you aren't listening for notifications in the background
-// to conserve system resources. you can stop like this:
-// Ti.App.currentService.stop();
-
-
-// you can unregister the service by calling 
-// Ti.App.currentService.unregister() 
-// and this service will be unregistered and never invoked again
+var count = 0;
 setInterval(function()
 {
-    count++;
-    label.text = "Interval fired " + count;
-}, 10);
+	Ti.API.log('Hello: ' + count);
+	count++;
+
+	Qpqp.Api.log(bh.db.listAlarms());
+	// Access to 
+}, 100);
+

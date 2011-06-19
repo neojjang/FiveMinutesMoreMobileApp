@@ -1,9 +1,6 @@
 (function() {
 	bh.db = {};
-
-	// Bootstraps the database
-	Ti.include('/library/bootstrap/db.js');
-	Ti.include('/library/packs/bcn.js');
+	bh.db._alarmsCategories = null;
 
 	// Alarms Package
     bh.db.listAlarms = function() {
@@ -53,28 +50,32 @@
 	
 	// Categories Package
     bh.db.listCategories = function() {
-        var categoriesList = [];
-        var db = Ti.Database.open('FiveMinutesMoreDb');
-        var result = db.execute('SELECT * FROM categories');
-        while (result.isValidRow()) {
-            categoriesList.push({
-                //add these attributes for the benefit of a table view
-                title: result.fieldByName('name'),
-                id: result.fieldByName('id'), //custom data attribute to pass to detail page
-				leftImage: 'images/categories/' + result.fieldByName('logo'),
-                hasChild: true,
-                //add actual db fields
-                name: result.fieldByName('name'),
-                description: result.fieldByName('description'),
-                logo: result.fieldByName('logo')
-            });
-            
-            result.next();
-        }
-        result.close(); //make sure to close the result set
-        db.close();
+    	if (bh.db._categoriesCache == null) {
+	        var categoriesList = [];
+	        var db = Ti.Database.open('FiveMinutesMoreDb');
+	        var result = db.execute('SELECT * FROM categories');
+	        while (result.isValidRow()) {
+	            categoriesList.push({
+	                //add these attributes for the benefit of a table view
+	                title: result.fieldByName('name'),
+	                id: result.fieldByName('id'), //custom data attribute to pass to detail page
+					leftImage: 'images/categories/' + result.fieldByName('logo'),
+	                hasChild: true,
+	                //add actual db fields
+	                name: result.fieldByName('name'),
+	                description: result.fieldByName('description'),
+	                logo: result.fieldByName('logo')
+	            });
+	            
+	            result.next();
+	        }
+	        result.close(); //make sure to close the result set
+	        db.close();
+	        
+	        bh.db._categoriesCache = categoriesList;
+    	}
         
-        return categoriesList;
+        return bh.db._categoriesCache;
     };
 
     bh.db.listFullCategories = function() {

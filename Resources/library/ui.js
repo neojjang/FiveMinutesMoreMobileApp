@@ -69,9 +69,9 @@
 		bh.ui.mapView = Titanium.Map.createView({
 			mapType: Titanium.Map.STANDARD_TYPE,
 			region: userRegion,
-			animate: true,
-			regionFit: true,
-			userLocation: true
+			animate: false,
+			regionFit: false,
+			userLocation: false
 		});
 		
 		bh.ui.annotations = [];
@@ -91,7 +91,7 @@
 						longitude: data[i].longitude,
 						title: data[i].name,
 						subtitle: data[i].latitude + ',' + data[i].longitude,
-						animate: true,
+						animate: false,
 						leftButton: 'images/mini-icons/03-clock.png'
 					});
 					
@@ -109,89 +109,51 @@
             style : Titanium.UI.iPhone.SystemButtonStyle.PLAIN
         });
         center.addEventListener('click', function() {
-			bh.ui.mapView.setLocation(Qpqp.Map.getCenterRegion(bh.ui.annotations));
+        	var localAnnotations = bh.ui.annotations;
+        	localAnnotations.push({
+        		latitude: bh.coords.latitude,
+        		longitude: bh.coords.longitude	
+    		});
+			bh.ui.mapView.setLocation(Qpqp.Map.getCenterRegion(localAnnotations));
         });
         win.setRightNavButton(center);
-
-		// button to change to ATL
-		atl = Titanium.UI.createButton({
-			style:Titanium.UI.iPhone.SystemButtonStyle.BORDERED,
-			title:'ATL'
-		});
 		
 		// activate annotation
+		/*
 		if (bh.ui.annotations.length > 0) {
 			bh.ui.mapView.selectAnnotation(bh.ui.annotations[0].title, true);
 		}
+		*/
 		
-		// button to change to SV	
-		sv = Titanium.UI.createButton({
-			style:Titanium.UI.iPhone.SystemButtonStyle.BORDERED,
-			title:'SV'
-		});
-		
-		bh.ui.mapView.addEventListener('complete', function()
-		{
-			Ti.API.info("map has completed loaded region");
-		});
-		
+		// Map Toolbar
 		var flexSpace = Titanium.UI.createButton({
 			systemButton:Titanium.UI.iPhone.SystemButton.FLEXIBLE_SPACE
 		});
+
+		var centerOnUser = Titanium.UI.createButton({
+			style: Titanium.UI.iPhone.SystemButtonStyle.BORDERED,
+			image: 'images/symbols/30-circle-in.png'
+		});
 		
-		// button to change map type to SAT
-		sat = Titanium.UI.createButton({
-			title:'Sat',
-			style:Titanium.UI.iPhone.SystemButtonStyle.BORDERED
+        centerOnUser.addEventListener('click', function() {
+			bh.ui.mapView.setLocation(bh.coords);
+        });
+
+		var centerOnAnnotations = Titanium.UI.createButton({
+			style: Titanium.UI.iPhone.SystemButtonStyle.BORDERED,
+			image: 'images/symbols/29-circle-out.png'
 		});
-		// button to change map type to STD
-		std = Titanium.UI.createButton({
-			title:'Std',
-			style:Titanium.UI.iPhone.SystemButtonStyle.BORDERED
-		});
-		// button to change map type to HYBRID
-		hyb = Titanium.UI.createButton({
-			title:'Hyb',
-			style:Titanium.UI.iPhone.SystemButtonStyle.BORDERED
-		});
-		// button to zoom-in
-		zoomin = Titanium.UI.createButton({
-			title:'+',
-			style:Titanium.UI.iPhone.SystemButtonStyle.BORDERED
-		});
-		// button to zoom-out
-		zoomout = Titanium.UI.createButton({
-			title:'-',
-			style:Titanium.UI.iPhone.SystemButtonStyle.BORDERED
-		});
-	
-		var wireClickHandlers = function() {
-			
-			sat.addEventListener('click',function() {
-				// set map type to satellite
-				bh.ui.mapView.setMapType(Titanium.Map.SATELLITE_TYPE);
-			});
-			
-			std.addEventListener('click',function() {
-				// set map type to standard
-				bh.ui.mapView.setMapType(Titanium.Map.STANDARD_TYPE);
-			});
-			
-			hyb.addEventListener('click',function() {
-				// set map type to hybrid
-				bh.ui.mapView.setMapType(Titanium.Map.HYBRID_TYPE);
-			});
-			
-			zoomin.addEventListener('click',function() {
-				bh.ui.mapView.zoom(1);
-			});
-			
-			zoomout.addEventListener('click',function() {
-				bh.ui.mapView.zoom(-1);
-			});
-		};
-		wireClickHandlers();
-		win.setToolbar([std,hyb,sat,flexSpace,zoomin,zoomout]);
+		
+        centerOnAnnotations.addEventListener('click', function() {
+        	var localAnnotations = bh.ui.annotations;
+        	localAnnotations.push({
+        		latitude: bh.coords.latitude,
+        		longitude: bh.coords.longitude	
+    		});
+			bh.ui.mapView.setLocation(Qpqp.Map.getCenterRegion(localAnnotations));
+        });
+		
+		win.setToolbar([centerOnUser, centerOnAnnotations, flexSpace]);
 		win.add(bh.ui.mapView);
 
         return win;

@@ -2,12 +2,17 @@ Titanium.UI.setBackgroundColor('#ffffff');
 
 var bh = {}; // 'bh' is our app's namespace
 bh.coords = null; // 'bh' is our app's namespace
+bh.service = null;
 
-Ti.include(  // we'll be including all the files for our namespace in the root app context
-	'library/ui.js',
-	'library/db.js'
-);
+// UI Interface
+Ti.include('/library/ui.js');
 
+// Database 
+Ti.include('/library/db.js');
+Ti.include('/library/bootstrap/db.js');
+Ti.include('/library/packs/bcn.js');
+
+// Tools
 Ti.include('library/version.js');
 Ti.include('library/qpqp.js');
 
@@ -31,14 +36,13 @@ else
 			message:'Your system has disallowed FiveMinutesMore from running geolocation services.'
 		}).show();
 	} else {
-		
 		Ti.Geolocation.preferredProvider = "gps";
 		
 		if (isIPhone3_2_Plus())
 		{
 			//NOTE: starting in 3.2+, you'll need to set the applications
 			//purpose property for using Location services on iPhone
-			Ti.Geolocation.purpose = "GPS demo";
+			Ti.Geolocation.purpose = "Current Position";
 		}
 		
 		Titanium.Geolocation.accuracy = Titanium.Geolocation.ACCURACY_BEST;
@@ -63,7 +67,7 @@ else
 			}
 
 			bh.coords = e.coords;
-			Titanium.API.log(JSON.stringify(bh.coords));
+			// Titanium.API.log(JSON.stringify(bh.coords));
 			//Use our custom UI constructors to build the app's UI
 			var tabs = bh.ui.createApplicationTabGroup();
 			tabs.open();
@@ -71,33 +75,25 @@ else
 	}
 }
 
-/*
-if (isiOS4Plus())
-{
-	// register a background service. this JS will run when the app is backgrounded
-	var service = Ti.App.iOS.registerBackgroundService({url:'tasks/bg.js'});
-	
-	Ti.API.info("registered background service = " + service);
-
-	// listen for a local notification event
-	Ti.App.iOS.addEventListener('notification',function(e)
-	{
-		Ti.API.info("local notification received: "+JSON.stringify(e));
-	});
-
-	// fired when an app resumes for suspension
-	Ti.App.addEventListener('resume',function(e){
-		Ti.API.info("app is resuming from the background");
-	});
+if (isiOS4Plus()) {
 	Ti.App.addEventListener('resumed',function(e){
-		Ti.API.info("app has resumed from the background");
-	});
+        Ti.API.info("app has resumed from the background");
+        // this will unregister the service if the user just opened the app
+        // is: not via the notification 'OK' button..
+        if (bh.service != null) {
+            bh.service.stop();
+            bh.service.unregister();
+        }
+    });
 
 	Ti.App.addEventListener('pause',function(e){
-		Ti.API.info("app was paused from the foreground");
-	});
+        Ti.API.info("app was paused from the foreground");
+        // START THE SERVICE NOW...
+ 
+        // this could have a custom event listener in it waiting for events from other parts
+        // of your app, like upload/download completion, gps data, etc.. 
+        bh.service = Ti.App.iOS.registerBackgroundService({
+        	url : '/tasks/bg.js'
+    	});
+    });
 }
-*/
-
-//Log our current platform to the console
-Ti.API.info('Welcome to FiveMinutesMore for ' + Ti.Platform.osname);
