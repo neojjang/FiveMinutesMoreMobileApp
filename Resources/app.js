@@ -13,17 +13,22 @@ Ti.include('/library/bootstrap/db.js');
 Ti.include('/library/packs/bcn.js');
 
 // Tools
-Ti.include('library/version.js');
-Ti.include('library/qpqp.js');
+Ti.include('/library/version.js');
+Ti.include('/library/qpqp.js');
+
+// bh.db.listActiveAlarms();
 
 if (Titanium.Geolocation.locationServicesEnabled === false)
 {
-	Titanium.UI.createAlertDialog({title:'FiveMinutesMore', message:'Your device has geo turned off - turn it on.'}).show();
+	Titanium.UI.createAlertDialog({
+		title: 'FiveMinutesMore',
+		message: 'Your device has geo turned off - turn it on.'
+	}).show();
 }
 else
 {
 	var authorization = Titanium.Geolocation.locationServicesAuthorization;
-	Ti.API.info('Authorization: '+authorization);
+	Ti.API.info('Authorization: ' + authorization);
 	if (authorization == Titanium.Geolocation.AUTHORIZATION_DENIED) {
 		Ti.UI.createAlertDialog({
 			title:'FiveMinutesMore',
@@ -52,7 +57,20 @@ else
 		//  THIS VALUE IS IN METERS
 		//
 		Titanium.Geolocation.distanceFilter = 10;
-	
+
+		/*		
+		var areasToFill = bh.db.listFullCategories();
+		var n = areasToFill.length;
+		for (var k = 0; k < n; k++) {
+			var nameToResolve = ;
+			Ti.API.log(nameToResolve);
+			Titanium.Geolocation.forwardGeocoder('"' + areasToFill[k].name + '" FGC Station, Spain', function(evt) {
+				evt.place = nameToResolve;
+				Qpqp.Api.log(evt);
+			});
+		}
+		*/
+
 		//
 		// GET CURRENT POSITION - THIS FIRES ONCE
 		//
@@ -76,7 +94,7 @@ else
 }
 
 if (isiOS4Plus()) {
-	Ti.App.addEventListener('resumed',function(e){
+	Ti.App.addEventListener('resumed', function(e) {
         Ti.API.info("app has resumed from the background");
         // this will unregister the service if the user just opened the app
         // is: not via the notification 'OK' button..

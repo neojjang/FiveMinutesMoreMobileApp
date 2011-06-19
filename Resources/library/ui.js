@@ -10,7 +10,8 @@
     
     bh.ui.createAlarmsWindow = function() {
         var win = Titanium.UI.createWindow({
-            title : L('alarms')
+            title : L('alarms'),
+            barColor: '#000000'
         });
 
         var tableView = bh.ui.createAlarmsTableView();
@@ -55,7 +56,8 @@
 
     bh.ui.createMapWindow = function() {
         var win = Titanium.UI.createWindow({
-            title : L('map')
+            title : L('map'),
+            barColor: '#000000'
         });
 		
 		var userRegion = {
@@ -90,9 +92,8 @@
 						latitude: data[i].latitude,
 						longitude: data[i].longitude,
 						title: data[i].name,
-						subtitle: data[i].latitude + ',' + data[i].longitude,
 						animate: false,
-						leftButton: 'images/mini-icons/03-clock.png'
+						leftButton: 'images/areas/fgc.png'
 					});
 					
 					bh.ui.annotations.push(newAnnotation);
@@ -117,13 +118,6 @@
 			bh.ui.mapView.setLocation(Qpqp.Map.getCenterRegion(localAnnotations));
         });
         win.setRightNavButton(center);
-		
-		// activate annotation
-		/*
-		if (bh.ui.annotations.length > 0) {
-			bh.ui.mapView.selectAnnotation(bh.ui.annotations[0].title, true);
-		}
-		*/
 		
 		// Map Toolbar
 		var flexSpace = Titanium.UI.createButton({
@@ -161,7 +155,8 @@
 
     bh.ui.createCategoriesWindow = function() {
         var win = Ti.UI.createWindow({
-            title : L('lines')
+            title : L('lines'),
+            barColor: '#000000'
         });
         
         var b = Titanium.UI.createButton({

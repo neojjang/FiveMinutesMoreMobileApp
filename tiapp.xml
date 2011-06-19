@@ -10,7 +10,7 @@
 <publisher>QuePimQuePam.com</publisher>
 <url>http://www.quepimquepam.com</url>
 <description>Sleep on the train without missing your stop</description>
-<copyright>2011 by QuePimQuePam.com</copyright>
+<copyright>QuePimQuePam Development, S.L.</copyright>
 <icon>default_app_logo.png</icon>
     <persistent-wifi>false</persistent-wifi>
     <prerendered-icon>false</prerendered-icon>

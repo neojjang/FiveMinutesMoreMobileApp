@@ -12,7 +12,7 @@
                 //add these attributes for the benefit of a table view
                 title: result.fieldByName('name'),
                 id: result.fieldByName('id'), //custom data attribute to pass to detail page
-                leftImage: 'images/mini-icons/03-clock.png',
+                leftImage: 'images/areas/fgc.png',
                 //add actual db fields
                 name: result.fieldByName('name'),
                 latitude: result.fieldByName('latitude'),
@@ -21,6 +21,29 @@
             result.next();
         }
         result.close(); //make sure to close the result set
+        db.close();
+
+        return alarmsList;
+    };
+
+    bh.db.listActiveAlarms = function(_latitude, _longitude) {
+        var alarmsList = [];
+        var db = Ti.Database.open('FiveMinutesMoreDb');
+        var result = db.execute('SELECT ar.id, a.name, a.latitude, a.longitude FROM alarms a, areas ar WHERE ar.id = a.area_id AND ar.latitude IS NOT NULL AND ar.longitude IS NOT NULL AND ABS(ar.latitude - ?) <= 0.001 AND ABS(ar.longitude - ?) <= 0.001', _latitude, _longitude);
+        while (result.isValidRow()) {
+            alarmsList.push({
+                //add these attributes for the benefit of a table view
+                title: result.fieldByName('name'),
+                id: result.fieldByName('id'), //custom data attribute to pass to detail page
+                leftImage: 'images/areas/fgc.png',
+                //add actual db fields
+                name: result.fieldByName('name'),
+                latitude: result.fieldByName('latitude'),
+                longitude: result.fieldByName('longitude')
+            });
+            result.next();
+        }
+        result.close();
         db.close();
 
         return alarmsList;
@@ -47,41 +70,11 @@
 			Ti.App.fireEvent('databaseUpdated');
 		}
 	};
-	
-	// Categories Package
-    bh.db.listCategories = function() {
-    	if (bh.db._categoriesCache == null) {
-	        var categoriesList = [];
-	        var db = Ti.Database.open('FiveMinutesMoreDb');
-	        var result = db.execute('SELECT * FROM categories');
-	        while (result.isValidRow()) {
-	            categoriesList.push({
-	                //add these attributes for the benefit of a table view
-	                title: result.fieldByName('name'),
-	                id: result.fieldByName('id'), //custom data attribute to pass to detail page
-					leftImage: 'images/categories/' + result.fieldByName('logo'),
-	                hasChild: true,
-	                //add actual db fields
-	                name: result.fieldByName('name'),
-	                description: result.fieldByName('description'),
-	                logo: result.fieldByName('logo')
-	            });
-	            
-	            result.next();
-	        }
-	        result.close(); //make sure to close the result set
-	        db.close();
-	        
-	        bh.db._categoriesCache = categoriesList;
-    	}
-        
-        return bh.db._categoriesCache;
-    };
 
     bh.db.listFullCategories = function() {
         var categoriesList = [];
         var db = Ti.Database.open('FiveMinutesMoreDb');
-        var result = db.execute('SELECT a.*, c.name as header, c.logo, c.description FROM categories c, area_category_link ac, areas a WHERE c.id = ac.category_id AND ac.area_id = a.id');
+        var result = db.execute('SELECT a.id, a.name, a.latitude, a.longitude, c.name as header, c.logo, c.description FROM categories c, area_category_link ac, areas a WHERE c.id = ac.category_id AND ac.area_id = a.id');
 		var previousHeader = '';
 		var currentHeader = '';
         while (result.isValidRow()) {
@@ -120,35 +113,4 @@
         // return categoriesList;
         return categoriesList;
     };
-
-    // Areas Package
-    bh.db.listAreas = function(_category) {
-        var areasList = [];
-        var db = Ti.Database.open('FiveMinutesMoreDb');
-        var result = db.execute('SELECT * FROM areas a, area_category_link ac WHERE ac.area_id = a.id AND ac.category_id = ?', _category.id);
-        while (result.isValidRow()) {
-	        var checked = db.execute('SELECT COUNT(*) as num FROM alarms WHERE area_id = ?', result.fieldByName('id'));
-	        var isChecked = checked.fieldByName('num');
-	        
-            areasList.push({
-                //add these attributes for the benefit of a table view
-                title: result.fieldByName('name'),
-                id: result.fieldByName('id'), //custom data attribute to pass to detail page
-                leftImage: 'images/categories/' + _category.logo,
-                //add actual db fields
-                name: result.fieldByName('name'),
-                longitud: result.fieldByName('longitude'),
-                latitude: result.fieldByName('latitude'),
-                hasCheck: isChecked !== 0
-                // Todo si está en el listado de alarmas hay que activarlo (hasCheck)
-            });
-            result.next();
-        }
-        result.close(); //make sure to close the result set
-        db.close();
-        
-        return areasList;
-    };
-
-	// Options Package
 })();

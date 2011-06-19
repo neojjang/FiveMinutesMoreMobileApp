@@ -49,8 +49,8 @@ var Qpqp = {};
 		return {
 			longitude: (longitude.max + longitude.min) / 2.0,
 			latitude: (latitude.max + latitude.min) / 2.0,
-			longitudeDelta: longitude.max - longitude.min + 0.01,
-			latitudeDelta: latitude.max - latitude.min + 0.01
+			longitudeDelta: longitude.max - longitude.min + 0.001,
+			latitudeDelta: latitude.max - latitude.min + 0.001
 		};
 	};
 })();
