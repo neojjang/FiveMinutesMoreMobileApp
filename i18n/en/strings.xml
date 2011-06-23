@@ -10,4 +10,6 @@
     <string name="cancel">Cancel</string>
     <string name="options">Options</string>
     <string name="center">Center</string>
+    <string name="sound">Sound</string>
+    <string name="range">Range</string>
 </resources>

@@ -72,8 +72,13 @@
 			mapType: Titanium.Map.STANDARD_TYPE,
 			region: userRegion,
 			animate: true,
-			regionFit: false,
+			regionFit: true,
 			userLocation: true
+		});
+		
+		bh.ui.mapView.setLocation({
+			latitude: bh.coords.latitude,
+			longitude: bh.coords.longitude
 		});
 		
 		bh.ui.annotations = [];
@@ -103,6 +108,27 @@
 		
         Ti.App.addEventListener('databaseUpdatedNew', populateAnnotations);
 		populateAnnotations();
+
+		var locationCallback = function(e)
+		{
+			Ti.API.info("Location event raised: ");
+			if (!e.success || e.error)
+			{
+				Ti.API.info("Code translation: ");
+				return;
+			}
+			
+			var region = {
+	            latitude: e.coords.latitude,
+	            longitude: e.coords.longitude,
+	            animate: true,
+	            latitudeDelta: 0.001,
+	            longitudeDelta: 0.001
+	        };
+        
+			bh.ui.mapView.setLocation(region);
+		};
+		Titanium.Geolocation.addEventListener('location', locationCallback);
 
         var center = Titanium.UI.createButton({
             title : L('center'),
@@ -158,7 +184,7 @@
 
     bh.ui.createCategoriesWindow = function() {
         var win = Ti.UI.createWindow({
-            title : L('lines'),
+            title : L('stops'),
             barColor: '#000000'
         });
         
@@ -172,6 +198,14 @@
         win.setRightNavButton(b);
 
         win.add(bh.ui.createCategoriesTableView());
+        return win;
+    };
+
+    bh.ui.createOptionsWindow = function() {
+        var win = Ti.UI.createWindow({
+            title : L('options'),
+            barColor: '#000000'
+        });
         return win;
     };
 
@@ -203,7 +237,7 @@
 
 		// create table view
         var tv = Ti.UI.createTableView({
-			search:search
+			search: search
 		});
 
         tv.addEventListener('click', function(_e) {
@@ -230,14 +264,7 @@
             }
         });
 
-        function populateData() {
-            var results = bh.db.listFullCategories();
-            tv.setData(results);
-        }
-
-        // run initial query
-        populateData();
-
+        tv.setData(bh.db.listFullCategories());
         return tv;
     };
 
@@ -271,8 +298,8 @@
         bh.ui.tabGroup = tabGroup;
 
         var alarms = bh.ui.createAlarmsWindow();
-        var map = bh.ui.createMapWindow();
-        // var options = bh.ui.createAlarmsWindow();
+        var options = bh.ui.createOptionsWindow();
+        // var map = bh.ui.createMapWindow();
 
         bh.ui.alarmsTab = Titanium.UI.createTab({
             icon : 'images/icons/11-clock@2x.png',
@@ -280,14 +307,23 @@
             window : alarms
         });
 
+        bh.ui.optionsTab = Titanium.UI.createTab({
+            icon : 'images/icons/11-clock@2x.png',
+            title : L('options'),
+            window : options
+        });
+
+		/*
         bh.ui.mapTab = Titanium.UI.createTab({
             icon : 'images/icons/07-map-marker@2x.png',
             title : L('map'),
             window : map
         });
+        */
 
         tabGroup.addTab(bh.ui.alarmsTab);
-        tabGroup.addTab(bh.ui.mapTab);
+        tabGroup.addTab(bh.ui.optionsTab);
+        // tabGroup.addTab(bh.ui.mapTab);
 
         return tabGroup;
     };

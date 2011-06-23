@@ -1,7 +1,7 @@
 Titanium.UI.setBackgroundColor('#ffffff');
 
-var bh = {}; // 'bh' is our app's namespace
-bh.coords = null; // 'bh' is our app's namespace
+var bh = {};
+bh.coords = null;
 bh.service = null;
 
 // UI Interface
@@ -43,13 +43,13 @@ if (Titanium.Geolocation.locationServicesEnabled === false) {
 			Ti.Geolocation.purpose = "Current Position";
 		}
 		
-		Titanium.Geolocation.accuracy = Titanium.Geolocation.ACCURACY_BEST;
+		// Titanium.Geolocation.accuracy = Titanium.Geolocation.ACCURACY_BEST;
 	
 		//
 		//  SET DISTANCE FILTER.  THIS DICTATES HOW OFTEN AN EVENT FIRES BASED ON THE DISTANCE THE DEVICE MOVES
 		//  THIS VALUE IS IN METERS
 		//
-		Titanium.Geolocation.distanceFilter = 10;
+		// Titanium.Geolocation.distanceFilter = 10;
 
 		/*		
 		var areasToFill = bh.db.listFullCategories();
@@ -67,6 +67,7 @@ if (Titanium.Geolocation.locationServicesEnabled === false) {
 		//
 		// GET CURRENT POSITION - THIS FIRES ONCE
 		//
+		/*
 		Titanium.Geolocation.getCurrentPosition(function(e) {
 			if (!e.success || e.error) {
 				currentLocation.text = 'error: ' + JSON.stringify(e.error);
@@ -81,8 +82,12 @@ if (Titanium.Geolocation.locationServicesEnabled === false) {
 			var tabs = bh.ui.createApplicationTabGroup();
 			tabs.open();
 		});
+		*/
 	}
 }
+
+var tabs = bh.ui.createApplicationTabGroup();
+tabs.open();
 
 if (isiOS4Plus()) {
 	Ti.App.addEventListener('resumed', function(e) {
@@ -96,7 +101,6 @@ if (isiOS4Plus()) {
 
 	Ti.App.addEventListener('pause',function(e){
         // START THE SERVICE NOW...
- 
         // this could have a custom event listener in it waiting for events from other parts
         // of your app, like upload/download completion, gps data, etc.. 
         bh.service = Ti.App.iOS.registerBackgroundService({

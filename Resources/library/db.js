@@ -29,7 +29,7 @@
     bh.db.listActiveAlarms = function(_latitude, _longitude) {
         var alarmsList = [];
         var db = Ti.Database.open('FiveMinutesMoreDb');
-        var result = db.execute('SELECT ar.id, a.name, a.latitude, a.longitude FROM alarms a, areas ar WHERE ar.id = a.area_id AND ar.latitude IS NOT NULL AND ar.longitude IS NOT NULL AND ABS(ar.latitude - ?) <= 0.001 AND ABS(ar.longitude - ?) <= 0.001', _latitude, _longitude);
+        var result = db.execute('SELECT ar.id, ar.name, ar.latitude, ar.longitude FROM alarms a, areas ar WHERE ar.id = a.area_id AND ar.latitude IS NOT NULL AND ar.longitude IS NOT NULL AND ABS(ar.latitude - ?) <= 0.001 AND ABS(ar.longitude - ?) <= 0.001', _latitude, _longitude);
         while (result.isValidRow()) {
             alarmsList.push({
                 //add these attributes for the benefit of a table view
