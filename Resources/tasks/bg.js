@@ -4,6 +4,7 @@ Ti.include('/library/db.js');
 Ti.include('/library/qpqp.js');
 
 // GPS Configuration
+/*
 var locationCallback = function(e) {
 	Ti.API.info('GPS Connection Attempt');
 	if (!e.success || e.error) {
@@ -27,4 +28,36 @@ var locationCallback = function(e) {
 
 // TODO: Add more Geolocation configurations
 Titanium.Geolocation.addEventListener('location', locationCallback);
+*/ 
 
+var count = 1;
+var notificationActive = false;
+setInterval(function()
+{
+	count++;
+	if (count % 3 == 0 && !notificationActive) {
+		/*
+		notificationActive = true;
+		notification = Ti.App.iOS.scheduleLocalNotification({
+			alertBody: "Wake up, Neo...",
+			alertAction: "Ok!",
+			// date: new Date(new Date().getTime() + 3000) // 3 seconds after backgrounding
+			date: new Date()
+		});
+		*/
+	}
+	
+	Qpqp.Api.log(count);
+}, 1000);
+
+
+// we cancel our notification if we don't want it to continue
+// notification.cancel(); 
+/*
+Ti.App.iOS.addEventListener('notification', function(e) {
+	notificationActive = false;
+	Qpqp.Api.log(e);
+});
+*/
+
+Ti.App.currentService.stop();

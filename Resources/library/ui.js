@@ -16,10 +16,12 @@
 
         var tableView = bh.ui.createAlarmsTableView();
 
+		/*
         var add = Titanium.UI.createButton({
             title : L('add'),
             style : Titanium.UI.iPhone.SystemButtonStyle.PLAIN
         });
+		*/
 
         var edit = Titanium.UI.createButton({
             title : L('edit')
@@ -30,26 +32,25 @@
             style : Titanium.UI.iPhone.SystemButtonStyle.DONE
         });
 
+		/*
         add.addEventListener('click', function() {
-            bh.ui.categoriesWindow = bh.ui.createCategoriesWindow();
+            bh.ui.categoriesWindow = bh.ui.createFullCategoriesWindow();
             bh.ui.categoriesWindow.open({modal:true});
         });
+        */
 
         edit.addEventListener('click', function() {
-            win.setLeftNavButton(cancel);
-            win.setRightNavButton(null);
+            win.setRightNavButton(cancel);
             tableView.editing = true;
         });
 
         cancel.addEventListener('click', function() {
-            win.setRightNavButton(add);
-            win.setLeftNavButton(edit);
+            win.setRightNavButton(edit);
             tableView.editing = false;
         });
 
         win.add(tableView);
-        win.setLeftNavButton(edit);
-        win.setRightNavButton(add);
+        win.setRightNavButton(edit);
 
         return win;
     };
@@ -182,7 +183,7 @@
         return win;
     };
 
-    bh.ui.createCategoriesWindow = function() {
+    bh.ui.createFullCategoriesWindow = function() {
         var win = Ti.UI.createWindow({
             title : L('stops'),
             barColor: '#000000'
@@ -197,42 +198,99 @@
         });
         win.setRightNavButton(b);
 
+        win.add(bh.ui.createFullCategoriesTableView());
+        return win;
+    };
+
+    bh.ui.createCategoriesWindow = function() {
+        var win = Ti.UI.createWindow({
+            title : L('lines'),
+            barColor: '#000000'
+        });
+        
         win.add(bh.ui.createCategoriesTableView());
+        return win;
+    };
+
+    bh.ui.createAreasWindow = function(_category) {
+        var win = Ti.UI.createWindow({
+            title : L('stops'),
+            barColor: '#000000'
+        });
+        
+        win.add(bh.ui.createAreasTableView(_category));
         return win;
     };
 
     bh.ui.createOptionsWindow = function() {
         var win = Ti.UI.createWindow({
             title : L('options'),
-            barColor: '#000000'
+            barColor: '#000000',
+            backgroundColor: '#CCCCCC'
         });
+        
+        // create table view
+		var soundsData = [{
+			title: 'Cricket',
+			hasCheck: true
+		}];
+		
+		var tableViewOptions = {
+			data: soundsData,
+			style: Titanium.UI.iPhone.TableViewStyle.GROUPED,
+			headerTitle: L('alarm sound'),
+			backgroundColor:'transparent',
+			rowBackgroundColor:'white'
+		};
+		var soundsTableview = Titanium.UI.createTableView(tableViewOptions);
+
+		var rangeData = [{
+			title: '100 m.',
+			hasCheck: true
+		}];
+		tableViewOptions = {
+			data: rangeData,
+			style: Titanium.UI.iPhone.TableViewStyle.GROUPED,
+			headerTitle: L('range'),
+			backgroundColor:'transparent',
+			rowBackgroundColor:'white'
+		};
+		var rangeTableview = Titanium.UI.createTableView(tableViewOptions);
+
+		win.add(soundsTableview);
+		win.add(rangeTableview);
         return win;
     };
 
     bh.ui.createAlarmsTableView = function() {
+		var search = Titanium.UI.createSearchBar({
+			barColor: '#CCCCCC'
+		});
         var tv = Ti.UI.createTableView({
+        	search: search,
             editable : true,
             allowsSelection : false,
             allowsSelectionDuringEditing : false
         });
 
         tv.addEventListener('delete', function(_e) {
-            // Delete the alarm
-            bh.db.deleteAlarm(_e.rowData.id, false);
+            bh.db.deleteAlarm(_e.rowData.id);
+            Ti.App.fireEvent('alarmsWindowUpdated');
         });
 
         function populateData() {
             var results = bh.db.listAlarms();
             tv.setData(results);
         }
-        Ti.App.addEventListener('databaseUpdated', populateData);
+        Ti.App.addEventListener('browseWindowUpdated', populateData);
 
         populateData();
 
         return tv;
     };
 
-    bh.ui.createCategoriesTableView = function() {
+	/*
+    bh.ui.createFullCategoriesTableView = function() {
 		var search = Titanium.UI.createSearchBar();
 
 		// create table view
@@ -267,19 +325,52 @@
         tv.setData(bh.db.listFullCategories());
         return tv;
     };
+    */
+
+    bh.ui.createCategoriesTableView = function() {
+		var search = Titanium.UI.createSearchBar({
+			barColor: '#CCCCCC'
+		});
+
+		// create table view
+        var tv = Ti.UI.createTableView({
+			search: search
+		});
+
+        tv.addEventListener('click', function(_e) {
+            var rowId = _e.rowData.id;
+			bh.ui.browseTab.open(bh.ui.createAreasWindow(rowId));
+        });
+
+        tv.setData(bh.db.listCategories());
+        return tv;
+    };
 
     bh.ui.createAreasTableView = function(_category) {
-        var tv = Ti.UI.createTableView();
+		var search = Titanium.UI.createSearchBar({
+			barColor: '#CCCCCC'
+		});
+
+        var tv = Ti.UI.createTableView({
+        	search: search
+        });
 
         tv.addEventListener('click', function(_e) {
             // Execute delete or save
             var active = _e.row.hasCheck;
             if (active) {
-                bh.db.deleteAlarm(_e.rowData.id, true);
+                bh.db.deleteAlarm(_e.rowData.id);
             } else {
                 bh.db.addAlarm(_e.rowData.id);
             }
-            _e.row.hasCheck = !_e.row.hasCheck;
+			Ti.App.fireEvent('browseWindowUpdated');
+
+            _e.row.hasCheck = !_e.row.hasCheck;            
+            if (_e.row.hasCheck) {
+	            _e.row.rightImage = 'images/mini-icons/03-clock.png';
+            } else {
+	            _e.row.rightImage = '';
+            }
         });
 
         function populateData() {
@@ -287,6 +378,8 @@
             tv.setData(results);
         }
 
+
+		Ti.App.addEventListener('alarmsWindowUpdated', populateData);
         // run initial query
         populateData();
 
@@ -298,6 +391,7 @@
         bh.ui.tabGroup = tabGroup;
 
         var alarms = bh.ui.createAlarmsWindow();
+        var browse = bh.ui.createCategoriesWindow();
         var options = bh.ui.createOptionsWindow();
         // var map = bh.ui.createMapWindow();
 
@@ -307,8 +401,14 @@
             window : alarms
         });
 
+        bh.ui.browseTab = Titanium.UI.createTab({
+            icon : 'images/icons/33-cabinet@2x.png',
+            title : L('browse'),
+            window : browse
+        });
+
         bh.ui.optionsTab = Titanium.UI.createTab({
-            icon : 'images/icons/11-clock@2x.png',
+            icon : 'images/icons/106-sliders@2x.png',
             title : L('options'),
             window : options
         });
@@ -322,6 +422,7 @@
         */
 
         tabGroup.addTab(bh.ui.alarmsTab);
+        tabGroup.addTab(bh.ui.browseTab);
         tabGroup.addTab(bh.ui.optionsTab);
         // tabGroup.addTab(bh.ui.mapTab);
 
