@@ -1,41 +1,33 @@
 (function() {
 	bh.db = {};
-	bh.db._alarmsCategories = null;
 
 	// Alarms Package
     bh.db.listAlarms = function() {
+		return bh.db._iListAlarms(false);
+    };
+
+    bh.db.listActiveAlarms = function(_latitude, _longitude) {
+		return bh.db._iListAlarms(true, _latitude, _longitude);
+    };
+
+	bh.db._iListAlarms = function(_active, _latitude, _longitude) {
         var alarmsList = [];
         var db = Ti.Database.open('FiveMinutesMoreDb');
-        var result = db.execute('SELECT * FROM alarms a, areas ar WHERE ar.id = a.area_id');
+        var result = null;
+        
+        if (_active) {
+	        result = db.execute('SELECT ar.id, ar.name, ar.latitude, ar.longitude FROM alarms a, areas ar WHERE ar.id = a.area_id AND ar.latitude IS NOT NULL AND ar.longitude IS NOT NULL AND ABS(ar.latitude - ?) <= 0.001 AND ABS(ar.longitude - ?) <= 0.001', _latitude, _longitude);
+        } else {
+	        result = db.execute('SELECT * FROM alarms a, areas ar WHERE ar.id = a.area_id');
+        }
+        
         while (result.isValidRow()) {
             alarmsList.push({
                 //add these attributes for the benefit of a table view
                 title: result.fieldByName('name'),
                 id: result.fieldByName('id'), //custom data attribute to pass to detail page
                 leftImage: 'images/areas/fgc.png',
-                //add actual db fields
-                name: result.fieldByName('name'),
-                latitude: result.fieldByName('latitude'),
-                longitude: result.fieldByName('longitude')
-            });
-            result.next();
-        }
-        result.close(); //make sure to close the result set
-        db.close();
 
-        return alarmsList;
-    };
-
-    bh.db.listActiveAlarms = function(_latitude, _longitude) {
-        var alarmsList = [];
-        var db = Ti.Database.open('FiveMinutesMoreDb');
-        var result = db.execute('SELECT ar.id, ar.name, ar.latitude, ar.longitude FROM alarms a, areas ar WHERE ar.id = a.area_id AND ar.latitude IS NOT NULL AND ar.longitude IS NOT NULL AND ABS(ar.latitude - ?) <= 0.001 AND ABS(ar.longitude - ?) <= 0.001', _latitude, _longitude);
-        while (result.isValidRow()) {
-            alarmsList.push({
-                //add these attributes for the benefit of a table view
-                title: result.fieldByName('name'),
-                id: result.fieldByName('id'),
-                leftImage: 'images/areas/fgc.png',
                 //add actual db fields
                 name: result.fieldByName('name'),
                 latitude: result.fieldByName('latitude'),
@@ -47,7 +39,7 @@
         db.close();
 
         return alarmsList;
-    };
+	};
 
     bh.db.addAlarm = function(_id) {
 		var db = Ti.Database.open('FiveMinutesMoreDb');
@@ -94,10 +86,9 @@
         	}
             
             categoriesList.push(newObject);
-            
             result.next();
         }
-        result.close(); //make sure to close the result set
+        result.close();
         db.close();
         
         return categoriesList;
@@ -121,13 +112,11 @@
             };
 
             categoriesList.push(newObject);
-            
             result.next();
         }
-        result.close(); //make sure to close the result set
+        result.close();
         db.close();
         
-        // return categoriesList;
         return categoriesList;
     };
 
@@ -147,15 +136,14 @@
                 //add actual db fields
                 name: result.fieldByName('name'),
                 logo: result.fieldByName('logo'),
-                hasCheck: isChecked,
-                rightImage: isChecked ? 'images/mini-icons/03-clock.png' : ''
+                hasCheck: isChecked
+                // rightImage: isChecked ? 'images/mini-icons/03-clock.png' : ''
             };
 
             areasList.push(newObject);
-            
             result.next();
         }
-        result.close(); //make sure to close the result set
+        result.close();
         db.close();
         
         return areasList;

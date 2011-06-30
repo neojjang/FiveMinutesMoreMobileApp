@@ -4,6 +4,10 @@ var bh = {};
 bh.coords = null;
 bh.service = null;
 
+// Tools
+Ti.include('/library/version.js');
+Ti.include('/library/qpqp.js');
+
 // UI Interface
 Ti.include('/library/ui.js');
 
@@ -12,10 +16,6 @@ Ti.include('/library/db.js');
 Ti.include('/library/bootstrap/db.js');
 Ti.include('/library/bootstrap/gps.js');
 Ti.include('/library/packs/bcn.js');
-
-// Tools
-Ti.include('/library/version.js');
-Ti.include('/library/qpqp.js');
 
 var tabs = bh.ui.createApplicationTabGroup();
 tabs.open();

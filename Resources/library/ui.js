@@ -230,35 +230,20 @@
         });
         
         // create table view
-		var soundsData = [{
-			title: 'Cricket',
-			hasCheck: true
-		}];
+		var data = [
+			{header: L('alarm sound'), title: 'Cricket', hasCheck: true},
+			{header: L('range'), title: '100 m.', hasCheck: true}
+		];
 		
 		var tableViewOptions = {
-			data: soundsData,
+			data: data,
 			style: Titanium.UI.iPhone.TableViewStyle.GROUPED,
-			headerTitle: L('alarm sound'),
 			backgroundColor:'transparent',
 			rowBackgroundColor:'white'
 		};
-		var soundsTableview = Titanium.UI.createTableView(tableViewOptions);
+		var tableview = Titanium.UI.createTableView(tableViewOptions);
 
-		var rangeData = [{
-			title: '100 m.',
-			hasCheck: true
-		}];
-		tableViewOptions = {
-			data: rangeData,
-			style: Titanium.UI.iPhone.TableViewStyle.GROUPED,
-			headerTitle: L('range'),
-			backgroundColor:'transparent',
-			rowBackgroundColor:'white'
-		};
-		var rangeTableview = Titanium.UI.createTableView(tableViewOptions);
-
-		win.add(soundsTableview);
-		win.add(rangeTableview);
+		win.add(tableview);
         return win;
     };
 
@@ -282,10 +267,9 @@
             var results = bh.db.listAlarms();
             tv.setData(results);
         }
+        
         Ti.App.addEventListener('browseWindowUpdated', populateData);
-
         populateData();
-
         return tv;
     };
 
@@ -357,20 +341,24 @@
 
         tv.addEventListener('click', function(_e) {
             // Execute delete or save
+
             var active = _e.row.hasCheck;
             if (active) {
                 bh.db.deleteAlarm(_e.rowData.id);
             } else {
                 bh.db.addAlarm(_e.rowData.id);
             }
-			Ti.App.fireEvent('browseWindowUpdated');
 
             _e.row.hasCheck = !_e.row.hasCheck;            
+			/*
             if (_e.row.hasCheck) {
 	            _e.row.rightImage = 'images/mini-icons/03-clock.png';
             } else {
 	            _e.row.rightImage = '';
             }
+            */
+
+			Ti.App.fireEvent('browseWindowUpdated');
         });
 
         function populateData() {
@@ -378,11 +366,8 @@
             tv.setData(results);
         }
 
-
 		Ti.App.addEventListener('alarmsWindowUpdated', populateData);
-        // run initial query
         populateData();
-
         return tv;
     };
 
