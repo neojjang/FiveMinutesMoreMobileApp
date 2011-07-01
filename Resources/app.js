@@ -38,11 +38,6 @@ if (isiOS4Plus()) {
         }
     });
 
-	Ti.App.iOS.addEventListener('notification',function(e)
-	{
-		Ti.API.info("local notification received: " + JSON.stringify(e));
-	});
-
 	Ti.App.addEventListener('pause',function(e){
 		Ti.API.info("app was paused from the foreground");
 

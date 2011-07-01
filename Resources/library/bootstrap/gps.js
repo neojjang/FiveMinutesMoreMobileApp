@@ -24,14 +24,30 @@ if (Titanium.Geolocation.locationServicesEnabled === false) {
 			//purpose property for using Location services on iPhone
 			Ti.Geolocation.purpose = "Current Position";
 		}
-		
-		// Titanium.Geolocation.accuracy = Titanium.Geolocation.ACCURACY_BEST;
-	
-		//
-		//  SET DISTANCE FILTER.  THIS DICTATES HOW OFTEN AN EVENT FIRES BASED ON THE DISTANCE THE DEVICE MOVES
-		//  THIS VALUE IS IN METERS
-		//
-		// Titanium.Geolocation.distanceFilter = 10;
+
+		Titanium.Geolocation.accuracy = Titanium.Geolocation.ACCURACY_BEST;
+		Titanium.Geolocation.distanceFilter = 10;
+		var locationCallback = function(e) {
+			Ti.API.info('GPS Connection Attempt');
+			if (!e.success || e.error) {
+				Ti.API.info('GPS Error:');
+				Qpqp.Api.log(e.error);
+				return;
+			} else {
+				Ti.API.info('GPS Success:');
+				Qpqp.Api.log(e);
+				var activeAlarms = bh.db.listActiveAlarms(e.latitude, e.longitude);
+				Qpqp.Api.log(activeAlarms);
+				if (activeAlarms.rowCount > 0) {
+					// Play the alarm sound
+					// Get Sound from configurations
+					var file = Titanium.Filesystem.getFile(Titanium.Filesystem.resourcesDirectory, 'sounds/cricket.wav');
+					var sound = Titanium.Media.createSound({sound:file});
+					sound.play();
+				}
+			}
+		};
+		Titanium.Geolocation.addEventListener('location', locationCallback);
 
 		/*		
 		var areasToFill = bh.db.listFullCategories();
@@ -67,24 +83,3 @@ if (Titanium.Geolocation.locationServicesEnabled === false) {
 		*/
 	}
 }
-
-var locationCallback = function(e) {
-	Ti.API.info('GPS Connection Attempt');
-	if (!e.success || e.error) {
-		Ti.API.info('GPS Error:');
-		Qpqp.Api.log(e.error);
-		return;
-	} else {
-		Ti.API.info('GPS Success:');
-		Qpqp.Api.log(e);
-		var activeAlarms = bh.db.listActiveAlarms(e.latitude, e.longitude);
-		Qpqp.Api.log(activeAlarms);
-		if (activeAlarms.rowCount > 0) {
-			// Play the alarm sound
-			// Get Sound from configurations
-			var file = Titanium.Filesystem.getFile(Titanium.Filesystem.resourcesDirectory, 'sounds/cricket.wav');
-			var sound = Titanium.Media.createSound({sound:file});
-			sound.play();
-		}
-	}
-};
