@@ -16,7 +16,7 @@
         var result = null;
         
         if (_active) {
-	        result = db.execute('SELECT ar.id, ar.name, ar.latitude, ar.longitude FROM alarms a, areas ar WHERE ar.id = a.area_id AND ar.latitude IS NOT NULL AND ar.longitude IS NOT NULL AND ABS(ar.latitude - ?) <= 0.001 AND ABS(ar.longitude - ?) <= 0.001', _latitude, _longitude);
+	        result = db.execute('SELECT ar.id, ar.name, ar.latitude, ar.longitude FROM alarms a, areas ar WHERE ar.id = a.area_id AND ar.latitude IS NOT NULL AND ar.longitude IS NOT NULL AND ABS(ar.latitude - ?) <= 0.01 AND ABS(ar.longitude - ?) <= 0.01', _latitude, _longitude);
         } else {
 	        result = db.execute('SELECT * FROM alarms a, areas ar WHERE ar.id = a.area_id');
         }

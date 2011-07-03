@@ -20,6 +20,45 @@ var Qpqp = {};
 
 (function() {
 	Qpqp.Map = {};
+
+	Qpqp.Map.Player = function(locations, time) {
+		var _locations = locations;
+		var _time = time;
+		var _internal = null;
+		var _mthis = this;
+		var _locationIndex = 0;
+		var _locationsNumber = locations.length;
+		
+		this.start = function() {
+			_mthis._interval = setInterval(function() {
+				var index = _mthis._locationIndex;
+				var location = _locations[index];
+				var eventObject = {
+					longitude: location.longitude,
+					latitude: location.latitude,
+					longitudeDelta: 0.01,
+					latitudeDelta: 0.01
+				};
+				_mthis.locationIndex = (_mthis.locationIndex + 1) % _mthis.locationsNumber;
+				Qpqp.Api.log(eventObject);
+				
+				Titanium.Geolocation.fireEvent('location', eventObject);				
+			}, _mthis._time);
+		};
+		
+		this.stop = function() {
+			if (_mthis._interval != null) {
+				clearInterval(_mthis._interval);
+			}
+		};
+
+		this.reset = function() {
+			 _mthis.locationIndex = 0;
+		};
+		
+		return _mthis;
+	};
+	
 	Qpqp.Map.getCenterRegion = function(locations) {
 		var n = locations.length;
 		

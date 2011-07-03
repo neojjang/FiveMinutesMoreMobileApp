@@ -1,8 +1,5 @@
 (function() {
     bh.ui = {};
-    bh.ui.categoriesWindow = null;
-    bh.ui.areasWindow = null;
-    bh.ui.alarmsWindow = null;
     
     bh.ui.tabGroup = null;
     bh.ui.alarmsTab = null;
@@ -10,24 +7,28 @@
     
     bh.ui.createAlarmsWindow = function() {
         var win = Titanium.UI.createWindow({
-            title : L('alarms'),
+            title: L('alarms'),
             barColor: '#000000'
         });
 
         var tableView = bh.ui.createAlarmsTableView();
 
         var about = Titanium.UI.createButton({
-            title : L('about'),
-            style : Titanium.UI.iPhone.SystemButtonStyle.PLAIN
+            title: L('about')
         });
 
         var edit = Titanium.UI.createButton({
-            title : L('edit')
+            title: L('edit')
         });
 
         var cancel = Titanium.UI.createButton({
-            title : L('cancel'),
-            style : Titanium.UI.iPhone.SystemButtonStyle.DONE
+            title: L('cancel'),
+            style: Titanium.UI.iPhone.SystemButtonStyle.DONE
+        });
+
+        about.addEventListener('click', function() {
+            var modalWindow = bh.ui.createAboutWindow();
+            modalWindow.open();
         });
 
         edit.addEventListener('click', function() {
@@ -49,23 +50,22 @@
 
     bh.ui.createMapWindow = function() {
         var win = Titanium.UI.createWindow({
-            title : L('map'),
+            title: L('map'),
             barColor: '#000000'
         });
 
-		// Creates map view
+		var firstLoad = true;
 		var mapView = Titanium.Map.createView({
-			mapType: Titanium.Map.STANDARD_TYPE
+			mapType: Titanium.Map.STANDARD_TYPE,
+			userLocation: false,
+			regionFit: false,
+			animate: false
 		});
 
-		bh.ui.annotations = [];
 		function populateAnnotations() {
 			var data = bh.db.listAlarms();
 			
-			// Remove annotations
-			bh.ui.mapView.removeAllAnnotations();
 			bh.ui.annotations = [];
-
 			for (var i = 0; i < data.length; i++) {
 				if (data[i].latitude && data[i].longitude) {
 					var newAnnotation = Titanium.Map.createAnnotation({
@@ -77,24 +77,31 @@
 					});
 					
 					bh.ui.annotations.push(newAnnotation);
-					mapView.addAnnotation(newAnnotation);
 				}
 			}
+
+			mapView.removeAllAnnotations();
+			mapView.addAnnotations(bh.ui.annotations);
 		}
-		
-        Ti.App.addEventListener('alarmsWindowUpdated', populateAnnotations);
-        Ti.App.addEventListener('browseWindowUpdated', populateAnnotations);
 		populateAnnotations();
 
+		function centerMap() {
+			if (firstLoad) {
+				mapView.setLocation(Qpqp.Map.getCenterRegion(bh.ui.annotations));
+				firstLoad = false;
+			}
+		}
+
+		mapView.addEventListener('complete', centerMap);
+        Ti.App.addEventListener('alarmsWindowUpdated', populateAnnotations);
+        Ti.App.addEventListener('browseWindowUpdated', populateAnnotations);
+		
         var center = Titanium.UI.createButton({
-			style: Titanium.UI.iPhone.SystemButtonStyle.BORDERED,
-			image: 'images/mini-icons/29-circle-out.png',
-			width: 30,
-			height: 30
+			title: L('center')
 		});
         
         center.addEventListener('click', function() {
-			mapView.setLocation(Qpqp.Map.getCenterRegion(bh.ui.annotations));
+        	mapView.setLocation(Qpqp.Map.getCenterRegion(bh.ui.annotations));
         });
         
         win.setRightNavButton(center);
@@ -102,9 +109,26 @@
         return win;
     };
 
+    bh.ui.createMapCustomAlarmsWindow = function() {
+        var win = Titanium.UI.createWindow({
+            title: L('custom'),
+            barColor: '#000000'
+        });
+
+		var mapView = Titanium.Map.createView({
+			mapType: Titanium.Map.STANDARD_TYPE,
+			userLocation: true,
+			regionFit: false,
+			animate: false
+		});
+		
+		win.add(mapView);
+        return win;
+    };
+
     bh.ui.createCategoriesWindow = function() {
         var win = Ti.UI.createWindow({
-            title : L('lines'),
+            title: L('lines'),
             barColor: '#000000'
         });
         
@@ -114,7 +138,7 @@
 
     bh.ui.createAreasWindow = function(_category) {
         var win = Ti.UI.createWindow({
-            title : L('stops'),
+            title: L('stops'),
             barColor: '#000000'
         });
         
@@ -124,44 +148,110 @@
 
     bh.ui.createOptionsWindow = function() {
         var win = Ti.UI.createWindow({
-            title : L('options'),
+            title: L('options'),
             barColor: '#000000',
             backgroundColor: '#CCCCCC'
         });
         
         // create table view
 		var data = [
-			{header: L('alarm sound'), title: 'Cricket', hasCheck: true},
-			{header: L('range'), title: '100 m.', hasCheck: true}
+			{
+				title: 'Cricket',
+				hasCheck: true,
+				file: Titanium.Media.createSound({sound:Titanium.Filesystem.getFile(Titanium.Filesystem.resourcesDirectory, 'sounds/cricket.wav')}),
+				header: L('alarm sound')
+			},
+			{
+				header: L('range'),
+				title: '100 m.',
+				hasCheck: true
+			}
 		];
 		
 		var tableViewOptions = {
 			data: data,
 			style: Titanium.UI.iPhone.TableViewStyle.GROUPED,
-			backgroundColor:'transparent',
-			rowBackgroundColor:'white'
+			backgroundColor: 'transparent',
+			rowBackgroundColor: 'white'
 		};
 		var tableview = Titanium.UI.createTableView(tableViewOptions);
+        tableview.addEventListener('click', function(_e) {
+            var rowSound = _e.rowData.file;
+			if (rowSound) {
+				rowSound.play();
+			}
+        });
 
 		win.add(tableview);
         return win;
     };
 
+    bh.ui.createAboutWindow = function() {
+        var win = Ti.UI.createWindow({
+            title : L('about'),
+            barColor: '#000000',
+			backgroundColor: '#FFFFFF',
+            modal: true
+        });
+		
+		var close = Titanium.UI.createButton({
+            title : L('close')
+        });
+
+        close.addEventListener('click', function() {
+            win.close();
+        });
+
+		win.setLeftNavButton(close);
+
+		var title = Titanium.UI.createLabel({
+			height: 50,
+			width: 'auto',
+			color: '#900',
+			font: {fontSize:48, fontStyle:'italic'},
+			top: 170,
+			textAlign: 'center',
+			text: 'GPS Alarm'
+		});
+
+		var description = Titanium.UI.createLabel({
+			id: 'font_label_test',
+			text: 'Sleep confortable on the train and let GPS Alarm. Do not forget to buy the milk.'
+		});
+
+		win.add(title);
+		win.add(description);
+
+        return win;
+    };
+
     bh.ui.createAlarmsTableView = function() {
 		var search = Titanium.UI.createSearchBar({
+			backgroundColor: '#CCCCCC',
 			barColor: '#CCCCCC'
 		});
 		
         var tv = Ti.UI.createTableView({
         	search: search,
             editable : true,
-            allowsSelection : false,
+            allowsSelection : true,
             allowsSelectionDuringEditing : false
         });
 
         tv.addEventListener('delete', function(_e) {
             bh.db.deleteAlarm(_e.rowData.id);
             Ti.App.fireEvent('alarmsWindowUpdated');
+        });
+
+        tv.addEventListener('click', function(_e) {
+        	if (_e.rowData.latitude && _e.rowData.longitude) {
+		    	var eventObj = {
+		    		success: true,
+		    		latitude: _e.rowData.latitude,
+		    		longitude: _e.rowData.longitude
+		    	};
+		    	Titanium.Geolocation.fireEvent('location', eventObj);
+        	}
         });
 
         function populateData() {
@@ -176,6 +266,7 @@
 
     bh.ui.createCategoriesTableView = function() {
 		var search = Titanium.UI.createSearchBar({
+			backgroundColor: '#CCCCCC',
 			barColor: '#CCCCCC'
 		});
 
@@ -195,6 +286,7 @@
 
     bh.ui.createAreasTableView = function(_category) {
 		var search = Titanium.UI.createSearchBar({
+			backgroundColor: '#CCCCCC',
 			barColor: '#CCCCCC'
 		});
 
@@ -232,6 +324,7 @@
         var browse = bh.ui.createCategoriesWindow();
         var options = bh.ui.createOptionsWindow();
         var map = bh.ui.createMapWindow();
+        var custom = bh.ui.createMapCustomAlarmsWindow();
 
         bh.ui.alarmsTab = Titanium.UI.createTab({
             icon : 'images/icons/11-clock@2x.png',
@@ -252,13 +345,20 @@
         });
 
         bh.ui.mapTab = Titanium.UI.createTab({
-            icon : 'images/icons/07-map-marker@2x.png',
+            icon : 'images/icons/103-map@2x.png',
             title : L('map'),
             window : map
         });
 
+        bh.ui.customTab = Titanium.UI.createTab({
+            icon : 'images/icons/07-map-marker@2x.png',
+            title : L('custom'),
+            window : custom
+        });
+
         tabGroup.addTab(bh.ui.alarmsTab);
         tabGroup.addTab(bh.ui.browseTab);
+        tabGroup.addTab(bh.ui.customTab);
         tabGroup.addTab(bh.ui.mapTab);
         tabGroup.addTab(bh.ui.optionsTab);
 
