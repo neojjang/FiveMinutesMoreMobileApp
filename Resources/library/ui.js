@@ -22,7 +22,7 @@
         });
 
         var cancel = Titanium.UI.createButton({
-            title: L('cancel'),
+            title: L('done'),
             style: Titanium.UI.iPhone.SystemButtonStyle.DONE
         });
 
@@ -190,7 +190,7 @@
         var win = Ti.UI.createWindow({
             title : L('about'),
             barColor: '#000000',
-			backgroundColor: '#FFFFFF',
+			backgroundColor: '#000000',
             modal: true
         });
 		
@@ -204,24 +204,8 @@
 
 		win.setLeftNavButton(close);
 
-		var title = Titanium.UI.createLabel({
-			height: 50,
-			width: 'auto',
-			color: '#900',
-			font: {fontSize:48, fontStyle:'italic'},
-			top: 170,
-			textAlign: 'center',
-			text: 'GPS Alarm'
-		});
-
-		var description = Titanium.UI.createLabel({
-			id: 'font_label_test',
-			text: 'Sleep confortable on the train and let GPS Alarm. Do not forget to buy the milk.'
-		});
-
-		win.add(title);
-		win.add(description);
-
+		var webview = Titanium.UI.createWebView({url:'/web/about.html'});
+		win.add(webview);
         return win;
     };
 
@@ -358,7 +342,7 @@
 
         tabGroup.addTab(bh.ui.alarmsTab);
         tabGroup.addTab(bh.ui.browseTab);
-        tabGroup.addTab(bh.ui.customTab);
+        // tabGroup.addTab(bh.ui.customTab);
         tabGroup.addTab(bh.ui.mapTab);
         tabGroup.addTab(bh.ui.optionsTab);
 

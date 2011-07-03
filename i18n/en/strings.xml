@@ -5,6 +5,7 @@
     <string name="stops">Stops</string>
     <string name="browse">Browse</string>
     <string name="add">Add</string>
+    <string name="done">Done</string>
     <string name="map">Map</string>
     <string name="edit">Edit</string>
     <string name="close">Close</string>
@@ -14,4 +15,5 @@
     <string name="alarm sound">Alarm sound</string>
     <string name="range">Range</string>
     <string name="about">About</string>
+    <string name="custom">Custom</string>
 </resources>
