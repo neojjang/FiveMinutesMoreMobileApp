@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <ti:app xmlns:ti="http://ti.appcelerator.org">
     <deployment-targets>
         <target device="mobileweb">false</target>
@@ -7,14 +7,14 @@
         <target device="ipad">false</target>
         <target device="iphone">true</target>
     </deployment-targets>
-	<id>com.quepimquepam.gpsalarm</id>
-	<name>GSP Alarm</name>
-	<version>1.0</version>
-	<publisher>QuePimQuePam.com</publisher>
-	<url>http://www.quepimquepam.com</url>
-	<description>Sleep on the train without missing your stop</description>
-	<copyright>QuePimQuePam Development, S.L.</copyright>
-	<icon>map_logo.png</icon>
+    <id>com.quepimquepam.gpsalarm</id>
+    <name>GSP Alarm</name>
+    <version>1.0</version>
+    <publisher>QuePimQuePam.com</publisher>
+    <url>http://www.quepimquepam.com</url>
+    <description>Sleep on the train without missing your stop</description>
+    <copyright>QuePimQuePam Development, S.L.</copyright>
+    <icon>map_logo.png</icon>
     <persistent-wifi>false</persistent-wifi>
     <prerendered-icon>false</prerendered-icon>
     <statusbar-style>black</statusbar-style>
@@ -22,20 +22,18 @@
     <fullscreen>false</fullscreen>
     <navbar-hidden>false</navbar-hidden>
     <analytics>false</analytics>
-	<guid>fe0e1a87-89d4-4b0f-a3f9-781af260fe88</guid>
-	<iphone>
-		<orientations device="iphone">
-			<orientation>Ti.UI.PORTRAIT</orientation>
-		</orientations>
-		<orientations device="ipad">
-			<orientation>Ti.UI.PORTRAIT</orientation>
-			<orientation>Ti.UI.UPSIDE_PORTRAIT</orientation>
-			<orientation>Ti.UI.LANDSCAPE_LEFT</orientation>
-			<orientation>Ti.UI.LANDSCAPE_RIGHT</orientation>
-		</orientations>
-	</iphone>
-	<android xmlns:android="http://schemas.android.com/apk/res/android">
-	</android>
-	<modules>
-	</modules>
+    <guid>fe0e1a87-89d4-4b0f-a3f9-781af260fe88</guid>
+    <iphone>
+        <orientations device="iphone">
+            <orientation>Ti.UI.PORTRAIT</orientation>
+        </orientations>
+        <orientations device="ipad">
+            <orientation>Ti.UI.PORTRAIT</orientation>
+            <orientation>Ti.UI.UPSIDE_PORTRAIT</orientation>
+            <orientation>Ti.UI.LANDSCAPE_LEFT</orientation>
+            <orientation>Ti.UI.LANDSCAPE_RIGHT</orientation>
+        </orientations>
+    </iphone>
+    <android xmlns:android="http://schemas.android.com/apk/res/android"/>
+    <modules/>
 </ti:app>

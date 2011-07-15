@@ -12,6 +12,24 @@ var Qpqp = {};
 })();
 
 (function() {
+    Qpqp.String = {};
+    Qpqp.String.join = function(a, separator, lastSeparator) {
+        var text = [];
+        var n = a.length;
+
+        if (n == 1) {
+            return a[0];
+        }
+        
+        for(var i = 0; i < n - 1; i++) {
+            text.push(a[i]);
+        }
+
+        return text.join(separator) + lastSeparator + a[n - 1];
+    };
+})();
+
+(function() {
 	Qpqp.Api = {};
 	Qpqp.Api.log = function(object) {
 		Titanium.API.log(JSON.stringify(object));

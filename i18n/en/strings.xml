@@ -16,4 +16,7 @@
     <string name="range">Range</string>
     <string name="about">About</string>
     <string name="custom">Custom</string>
+    <string name="location">Location</string>
+    <string name="and">and</string>
+    <string name="Hey! You are around">Hey! You are around</string>
 </resources>

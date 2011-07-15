@@ -32,18 +32,34 @@
         });
 
         edit.addEventListener('click', function() {
-            win.setRightNavButton(cancel);
+            win.setLeftNavButton(cancel);
             tableView.editing = true;
         });
 
         cancel.addEventListener('click', function() {
-            win.setRightNavButton(edit);
+            win.setLeftNavButton(edit);
             tableView.editing = false;
         });
 
+        /*
+        function updateEditButton() {
+            Qpqp.Api.log(tableView.data);
+            if (tableView.data.length > 0) {
+                win.setLeftNavButton(edit);
+            } else {
+                win.setLeftNavButton(null);
+                tableView.editing = false;
+            }
+        }
+        */
+        
         win.add(tableView);
-        win.setLeftNavButton(about);
-        win.setRightNavButton(edit);
+        win.setRightNavButton(about);
+        win.setLeftNavButton(edit);
+
+        // updateEditButton();
+        // Ti.App.addEventListener('alarmsWindowUpdated', updateEditButton);
+        // Ti.App.addEventListener('browseWindowUpdated', updateEditButton);
 
         return win;
     };
@@ -57,9 +73,9 @@
 		var firstLoad = true;
 		var mapView = Titanium.Map.createView({
 			mapType: Titanium.Map.STANDARD_TYPE,
-			userLocation: false,
-			regionFit: false,
-			animate: false
+			userLocation: true,
+			regionFit: true,
+			animate: true
 		});
 
 		function populateAnnotations() {
@@ -72,7 +88,7 @@
 						latitude: data[i].latitude,
 						longitude: data[i].longitude,
 						title: data[i].name,
-						animate: false,
+						animate: true,
 						leftButton: 'images/areas/fgc.png'
 					});
 					
@@ -87,24 +103,46 @@
 
 		function centerMap() {
 			if (firstLoad) {
-				mapView.setLocation(Qpqp.Map.getCenterRegion(bh.ui.annotations));
+				if (bh.ui.annotations.length > 0) {
+					mapView.setLocation(Qpqp.Map.getCenterRegion(bh.ui.annotations));
+				} else {
+					mapView.setLocation(Qpqp.Map.getCenterRegion(bh.gps.currentLocation));
+				}
+
 				firstLoad = false;
 			}
 		}
+
 
 		mapView.addEventListener('complete', centerMap);
         Ti.App.addEventListener('alarmsWindowUpdated', populateAnnotations);
         Ti.App.addEventListener('browseWindowUpdated', populateAnnotations);
 		
-        var center = Titanium.UI.createButton({
+        var centerOnAlarms = Titanium.UI.createButton({
 			title: L('center')
 		});
         
-        center.addEventListener('click', function() {
-        	mapView.setLocation(Qpqp.Map.getCenterRegion(bh.ui.annotations));
+        centerOnAlarms.addEventListener('click', function() {
+			var location = Qpqp.Map.getCenterRegion(bh.ui.annotations);
+        	if (location) {
+	        	mapView.setLocation(location);
+        	}
         });
         
-        win.setRightNavButton(center);
+        var centerOnLocation = Titanium.UI.createButton({
+			title: L('location')
+		});
+        
+        centerOnLocation.addEventListener('click', function() {
+            Qpqp.Api.log('Centering on current location:');
+            Qpqp.Api.log(bh.gps.currentLocation);
+        	if (bh.gps.currentLocation) {
+	        	mapView.setLocation(bh.gps.currentLocation);
+        	}
+        });
+
+        win.setLeftNavButton(centerOnLocation);
+        win.setRightNavButton(centerOnAlarms);
 		win.add(mapView);
         return win;
     };
@@ -202,7 +240,7 @@
             win.close();
         });
 
-		win.setLeftNavButton(close);
+		win.setRightNavButton(close);
 
 		var webview = Titanium.UI.createWebView({url:'/web/about.html'});
 		win.add(webview);

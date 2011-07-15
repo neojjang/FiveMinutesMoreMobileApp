@@ -16,7 +16,7 @@
         var result = null;
         
         if (_active) {
-	        result = db.execute('SELECT ar.id, ar.name, ar.latitude, ar.longitude FROM alarms a, areas ar WHERE ar.id = a.area_id AND ar.latitude IS NOT NULL AND ar.longitude IS NOT NULL AND ABS(ar.latitude - ?) <= 0.01 AND ABS(ar.longitude - ?) <= 0.01', _latitude, _longitude);
+	        result = db.execute('SELECT ar.id, ar.name, ar.latitude, ar.longitude FROM alarms a, areas ar WHERE ar.id = a.area_id AND ar.latitude IS NOT NULL AND ar.longitude IS NOT NULL AND a.active = 1 AND ABS(ar.latitude - ?) <= 0.01 AND ABS(ar.longitude - ?) <= 0.01', _latitude, _longitude);
         } else {
 	        result = db.execute('SELECT * FROM alarms a, areas ar WHERE ar.id = a.area_id');
         }
@@ -43,9 +43,15 @@
 
     bh.db.addAlarm = function(_id) {
 		var db = Ti.Database.open('FiveMinutesMoreDb');
-		db.execute('INSERT INTO alarms(area_id) VALUES(?)', _id);
+		db.execute('INSERT INTO alarms(area_id, active) VALUES(?, ?)', _id, 1);
 		db.close();
 	};
+
+    bh.db.editAlarm = function(_id, _active) {
+        var db = Ti.Database.open('FiveMinutesMoreDb');
+        db.execute('UPDATE alarms SET active = ? WHERE area_id = ?', _active, _id);
+        db.close();
+    };
 
 	bh.db.deleteAlarm = function(_id) {
 		var db = Ti.Database.open('FiveMinutesMoreDb');

@@ -14,7 +14,8 @@ db.execute('CREATE TABLE IF NOT EXISTS area_category_link (category_id INTEGER, 
 db.execute('DELETE FROM area_category_link');
 
 // Alarms Table
-db.execute('CREATE TABLE IF NOT EXISTS alarms (area_id INTEGER)');
+db.execute('CREATE TABLE IF NOT EXISTS alarms (area_id INTEGER, active INTEGER)');
+db.execute('UPDATE alarms SET active = 1');
 
 // Close connection
 db.close();
