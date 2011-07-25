@@ -21,19 +21,6 @@ var tabs = bh.ui.createApplicationTabGroup();
 tabs.open();
 
 /*
-var locations = [];
-locations.push({longitud: 11, latitude: 11});
-locations.push({longitud: 12, latitude: 12});
-locations.push({longitud: 13, latitude: 13});
-locations.push({longitud: 14, latitude: 14});
-locations.push({longitud: 15, latitude: 15});
-locations.push({longitud: 16, latitude: 16});
-var tracker = new Qpqp.Map.Player(locations, 1000);
-Qpqp.Api.log(tracker);
-tracker.start();
-*/
-
-/*
 if (isiOS4Plus()) {
 	// fired when an app resumes for suspension
 	Ti.App.addEventListener('resume',function(e){

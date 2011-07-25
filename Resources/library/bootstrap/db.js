@@ -2,7 +2,8 @@
 var db = Titanium.Database.open('FiveMinutesMoreDb');
 
 // Categories Table
-db.execute('CREATE TABLE IF NOT EXISTS categories (id INTEGER, name TEXT, description TEXT, logo TEXT)');
+db.execute('DROP TABLE categories');
+db.execute('CREATE TABLE IF NOT EXISTS categories (id INTEGER, name TEXT, description TEXT, logo TEXT, parent_id INTEGER)');
 db.execute('DELETE FROM categories');
 
 // Areas Table

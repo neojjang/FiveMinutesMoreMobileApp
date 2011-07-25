@@ -1,9 +1,8 @@
 (function() {
     bh.ui = {};
     
-    bh.ui.tabGroup = null;
-    bh.ui.alarmsTab = null;
-    bh.ui.mapView = null;
+    bh.ui.browseTab = null;
+    bh.ui._annotations = [];
     
     bh.ui.createAlarmsWindow = function() {
         var win = Titanium.UI.createWindow({
@@ -41,9 +40,8 @@
             tableView.editing = false;
         });
 
-        /*
         function updateEditButton() {
-            Qpqp.Api.log(tableView.data);
+            Qpqp.Api.log(tableView);
             if (tableView.data.length > 0) {
                 win.setLeftNavButton(edit);
             } else {
@@ -51,13 +49,12 @@
                 tableView.editing = false;
             }
         }
-        */
         
         win.add(tableView);
         win.setRightNavButton(about);
         win.setLeftNavButton(edit);
 
-        // updateEditButton();
+        updateEditButton();
         // Ti.App.addEventListener('alarmsWindowUpdated', updateEditButton);
         // Ti.App.addEventListener('browseWindowUpdated', updateEditButton);
 
@@ -70,80 +67,106 @@
             barColor: '#000000'
         });
 
-		var firstLoad = true;
-		var mapView = Titanium.Map.createView({
-			mapType: Titanium.Map.STANDARD_TYPE,
-			userLocation: true,
-			regionFit: true,
-			animate: true
-		});
+        var firstLoad = true;
+        
+        function getAnnotations() {
+            var annotations = [];
+            var data = bh.db.listAlarms();
+            for (var i = 0; i < data.length; i++) {
+                if (data[i].latitude && data[i].longitude) {
+                    var newAnnotation = Titanium.Map.createAnnotation({
+                        latitude: data[i].latitude,
+                        longitude: data[i].longitude,
+                        title: data[i].name,
+                        animate: true,
+                        leftButton: 'images/areas/fgc.png'
+                    });
+                    annotations.push(newAnnotation);
+                }
+            }
+            return annotations;
+        }
+        
+        bh.ui._annotations = getAnnotations();
+        
+        var mapView = Titanium.Map.createView({
+            mapType: Titanium.Map.STANDARD_TYPE,
+            userLocation: true,
+            regionFit: false,
+            animate: true
+        });
 
-		function populateAnnotations() {
-			var data = bh.db.listAlarms();
-			
-			bh.ui.annotations = [];
-			for (var i = 0; i < data.length; i++) {
-				if (data[i].latitude && data[i].longitude) {
-					var newAnnotation = Titanium.Map.createAnnotation({
-						latitude: data[i].latitude,
-						longitude: data[i].longitude,
-						title: data[i].name,
-						animate: true,
-						leftButton: 'images/areas/fgc.png'
-					});
-					
-					bh.ui.annotations.push(newAnnotation);
-				}
-			}
+        function centerMap(e) {
+            Qpqp.Api.log(e);
+            if (e && !firstLoad) {
+                return;
+            }
+            firstLoad = false;
+            
+            if (bh.ui._annotations.length > 0) {
+                mapView.setLocation(Qpqp.Map.getCenterRegion(bh.ui._annotations));
+            } else {
+                mapView.setLocation({
+                    latitude: bh.gps._location.latitude,
+                    longitude: bh.gps._location.longitude,
+                    latitudeDelta: 0.01,
+                    longitudeDelta: 0.01,
+                    animate: true
+                });
+            }
+        }
+        
+        function populateAnnotations() {
+            var annotations = getAnnotations();
+            mapView.removeAllAnnotations();
+            Qpqp.Api.log('Annotations removed');
+            mapView.addAnnotations(annotations);
+        }
+        populateAnnotations();
+        
+        mapView.addEventListener('regionChanged', centerMap);
 
-			mapView.removeAllAnnotations();
-			mapView.addAnnotations(bh.ui.annotations);
-		}
-		populateAnnotations();
-
-		function centerMap() {
-			if (firstLoad) {
-				if (bh.ui.annotations.length > 0) {
-					mapView.setLocation(Qpqp.Map.getCenterRegion(bh.ui.annotations));
-				} else {
-					mapView.setLocation(Qpqp.Map.getCenterRegion(bh.gps.currentLocation));
-				}
-
-				firstLoad = false;
-			}
-		}
-
-
-		mapView.addEventListener('complete', centerMap);
         Ti.App.addEventListener('alarmsWindowUpdated', populateAnnotations);
         Ti.App.addEventListener('browseWindowUpdated', populateAnnotations);
-		
+        
         var centerOnAlarms = Titanium.UI.createButton({
-			title: L('center')
-		});
+            title: L('center')
+        });
         
         centerOnAlarms.addEventListener('click', function() {
-			var location = Qpqp.Map.getCenterRegion(bh.ui.annotations);
-        	if (location) {
-	        	mapView.setLocation(location);
-        	}
+            var location = Qpqp.Map.getCenterRegion(bh.ui._annotations);
+            if (location) {
+                mapView.setLocation(location);
+            }
         });
-        
+
         var centerOnLocation = Titanium.UI.createButton({
-			title: L('location')
-		});
+            title: L('location')
+        });
         
         centerOnLocation.addEventListener('click', function() {
-            Qpqp.Api.log('Centering on current location:');
-            Qpqp.Api.log(bh.gps.currentLocation);
-        	if (bh.gps.currentLocation) {
-	        	mapView.setLocation(bh.gps.currentLocation);
-        	}
+            Qpqp.Api.log('Centering on current location...');
+            Qpqp.Api.log(bh.gps._location);
+            if (bh.gps._location) {
+                mapView.setLocation({
+                    latitude: bh.gps._location.latitude,
+                    longitude: bh.gps._location.longitude,
+                    animate: true,
+                    latitudeDelta:0.04,
+                    longitudeDelta:0.04
+                });
+            }
         });
+
+        /*
+        mapView.addEventListener('click', function(e) {
+            Qpqp.Api.log(Qpqp.Map.clickToCoordinates(e.));
+        });
+        */
 
         win.setLeftNavButton(centerOnLocation);
         win.setRightNavButton(centerOnAlarms);
-		win.add(mapView);
+        win.add(mapView);
         return win;
     };
 
@@ -153,34 +176,28 @@
             barColor: '#000000'
         });
 
-		var mapView = Titanium.Map.createView({
-			mapType: Titanium.Map.STANDARD_TYPE,
-			userLocation: true,
-			regionFit: false,
-			animate: false
-		});
-		
-		win.add(mapView);
+        var mapView = Titanium.Map.createView({
+            mapType: Titanium.Map.STANDARD_TYPE,
+            userLocation: false,
+            region:{
+                latitude:33.74511, longitude:-84.38993,
+                latitudeDelta:0.5, longitudeDelta:0.5
+            },
+            regionFit: true,
+            animate: true
+        });
+        
+        win.add(mapView);
         return win;
     };
 
-    bh.ui.createCategoriesWindow = function() {
+    bh.ui.createBrowseWindow = function(_category, _title) {
         var win = Ti.UI.createWindow({
-            title: L('lines'),
+            title: _title == null ? L('lines') : _title,
             barColor: '#000000'
         });
         
-        win.add(bh.ui.createCategoriesTableView());
-        return win;
-    };
-
-    bh.ui.createAreasWindow = function(_category) {
-        var win = Ti.UI.createWindow({
-            title: L('stops'),
-            barColor: '#000000'
-        });
-        
-        win.add(bh.ui.createAreasTableView(_category));
+        win.add(bh.ui.createBrowseTableView(_category));
         return win;
     };
 
@@ -192,35 +209,38 @@
         });
         
         // create table view
-		var data = [
-			{
-				title: 'Cricket',
-				hasCheck: true,
-				file: Titanium.Media.createSound({sound:Titanium.Filesystem.getFile(Titanium.Filesystem.resourcesDirectory, 'sounds/cricket.wav')}),
-				header: L('alarm sound')
-			},
-			{
-				header: L('range'),
-				title: '100 m.',
-				hasCheck: true
-			}
-		];
-		
-		var tableViewOptions = {
-			data: data,
-			style: Titanium.UI.iPhone.TableViewStyle.GROUPED,
-			backgroundColor: 'transparent',
-			rowBackgroundColor: 'white'
-		};
-		var tableview = Titanium.UI.createTableView(tableViewOptions);
+        var data = [
+            {
+                title: 'Cricket',
+                hasCheck: true,
+                file: Titanium.Media.createSound({
+                    sound: Titanium.Filesystem.getFile(Titanium.Filesystem.resourcesDirectory, 'sounds/cricket.wav')
+                }),
+                header: L('alarm sound')
+            },
+            {
+                header: L('range'),
+                title: '100 m.',
+                hasCheck: true
+            }
+        ];
+        
+        var tableViewOptions = {
+            data: data,
+            style: Titanium.UI.iPhone.TableViewStyle.GROUPED,
+            backgroundColor: 'transparent',
+            rowBackgroundColor: 'white'
+        };
+        
+        var tableview = Titanium.UI.createTableView(tableViewOptions);
         tableview.addEventListener('click', function(_e) {
             var rowSound = _e.rowData.file;
-			if (rowSound) {
-				rowSound.play();
-			}
+            if (rowSound) {
+                rowSound.play();
+            }
         });
 
-		win.add(tableview);
+        win.add(tableview);
         return win;
     };
 
@@ -228,11 +248,11 @@
         var win = Ti.UI.createWindow({
             title : L('about'),
             barColor: '#000000',
-			backgroundColor: '#000000',
+            backgroundColor: '#000000',
             modal: true
         });
-		
-		var close = Titanium.UI.createButton({
+        
+        var close = Titanium.UI.createButton({
             title : L('close')
         });
 
@@ -240,21 +260,21 @@
             win.close();
         });
 
-		win.setRightNavButton(close);
+        win.setRightNavButton(close);
 
-		var webview = Titanium.UI.createWebView({url:'/web/about.html'});
-		win.add(webview);
+        var webview = Titanium.UI.createWebView({url:'/web/about.html'});
+        win.add(webview);
         return win;
     };
 
     bh.ui.createAlarmsTableView = function() {
-		var search = Titanium.UI.createSearchBar({
-			backgroundColor: '#CCCCCC',
-			barColor: '#CCCCCC'
-		});
-		
+        var search = Titanium.UI.createSearchBar({
+            backgroundColor: '#CCCCCC',
+            barColor: '#CCCCCC'
+        });
+        
         var tv = Ti.UI.createTableView({
-        	search: search,
+            search: search,
             editable : true,
             allowsSelection : true,
             allowsSelectionDuringEditing : false
@@ -266,14 +286,16 @@
         });
 
         tv.addEventListener('click', function(_e) {
-        	if (_e.rowData.latitude && _e.rowData.longitude) {
-		    	var eventObj = {
-		    		success: true,
-		    		latitude: _e.rowData.latitude,
-		    		longitude: _e.rowData.longitude
-		    	};
-		    	Titanium.Geolocation.fireEvent('location', eventObj);
-        	}
+            if (_e.rowData.latitude && _e.rowData.longitude) {
+                var eventObj = {
+                    success: true,
+                    coords: {
+                        latitude: _e.rowData.latitude,
+                        longitude: _e.rowData.longitude
+                    }
+                };
+                Titanium.Geolocation.fireEvent('location', eventObj);
+            }
         });
 
         function populateData() {
@@ -286,69 +308,63 @@
         return tv;
     };
 
-    bh.ui.createCategoriesTableView = function() {
-		var search = Titanium.UI.createSearchBar({
-			backgroundColor: '#CCCCCC',
-			barColor: '#CCCCCC'
-		});
+    bh.ui.createBrowseTableView = function(_category) {
+        var search = Titanium.UI.createSearchBar({
+            backgroundColor: '#CCCCCC',
+            barColor: '#CCCCCC'
+        });
 
-		// create table view
+        // create table view
         var tv = Ti.UI.createTableView({
-			search: search
-		});
+            search: search
+        });
 
         tv.addEventListener('click', function(_e) {
             var rowId = _e.rowData.id;
-			bh.ui.browseTab.open(bh.ui.createAreasWindow(rowId));
-        });
-
-        tv.setData(bh.db.listCategories());
-        return tv;
-    };
-
-    bh.ui.createAreasTableView = function(_category) {
-		var search = Titanium.UI.createSearchBar({
-			backgroundColor: '#CCCCCC',
-			barColor: '#CCCCCC'
-		});
-
-        var tv = Ti.UI.createTableView({
-        	search: search
-        });
-
-        tv.addEventListener('click', function(_e) {
-            var active = _e.row.hasCheck;
-            if (active) {
-                bh.db.deleteAlarm(_e.rowData.id);
+            var rowCategoryId = _e.rowData.parentId;
+            if (rowCategoryId != null) {
+                // Clicked on a category
+                 bh.ui.browseTab.open(bh.ui.createBrowseWindow(rowId, _e.rowData.title));
             } else {
-                bh.db.addAlarm(_e.rowData.id);
+                // Code for check and uncheck alarms
+                // Clicked on an alarm
+                 var active = _e.row.hasCheck;
+                 if (active) {
+                     bh.db.deleteAlarm(_e.rowData.id);
+                 } else {
+                     bh.db.addAlarm(_e.rowData.id);
+                 }
+     
+                 _e.row.hasCheck = !_e.row.hasCheck;
+                 Ti.App.fireEvent('browseWindowUpdated');
             }
-
-            _e.row.hasCheck = !_e.row.hasCheck;            
-			Ti.App.fireEvent('browseWindowUpdated');
         });
 
         function populateData() {
-            var results = bh.db.listAreas(_category);
-            tv.setData(results);
+            var data = bh.db.listCategories(_category);
+            var alarms = bh.db.listAreas(_category);
+            for (var i = 0; i < alarms.length; i++) {
+                data.push(alarms[i]);
+            }
+            tv.setData(data);
         }
 
-		Ti.App.addEventListener('alarmsWindowUpdated', populateData);
+        Ti.App.addEventListener('alarmsWindowUpdated', populateData);
         populateData();
+
         return tv;
     };
 
     bh.ui.createApplicationTabGroup = function() {
         var tabGroup = Titanium.UI.createTabGroup();
-        bh.ui.tabGroup = tabGroup;
 
         var alarms = bh.ui.createAlarmsWindow();
-        var browse = bh.ui.createCategoriesWindow();
+        var browse = bh.ui.createBrowseWindow();
         var options = bh.ui.createOptionsWindow();
         var map = bh.ui.createMapWindow();
         var custom = bh.ui.createMapCustomAlarmsWindow();
 
-        bh.ui.alarmsTab = Titanium.UI.createTab({
+        var alarmsTab = Titanium.UI.createTab({
             icon : 'images/icons/11-clock@2x.png',
             title : L('alarms'),
             window : alarms
@@ -360,29 +376,29 @@
             window : browse
         });
 
-        bh.ui.optionsTab = Titanium.UI.createTab({
+        var optionsTab = Titanium.UI.createTab({
             icon : 'images/icons/106-sliders@2x.png',
             title : L('options'),
             window : options
         });
 
-        bh.ui.mapTab = Titanium.UI.createTab({
+        var mapTab = Titanium.UI.createTab({
             icon : 'images/icons/103-map@2x.png',
             title : L('map'),
             window : map
         });
 
-        bh.ui.customTab = Titanium.UI.createTab({
+        var customTab = Titanium.UI.createTab({
             icon : 'images/icons/07-map-marker@2x.png',
             title : L('custom'),
             window : custom
         });
 
-        tabGroup.addTab(bh.ui.alarmsTab);
+        tabGroup.addTab(alarmsTab);
         tabGroup.addTab(bh.ui.browseTab);
-        // tabGroup.addTab(bh.ui.customTab);
-        tabGroup.addTab(bh.ui.mapTab);
-        tabGroup.addTab(bh.ui.optionsTab);
+        tabGroup.addTab(bh.ui.customTab);
+        tabGroup.addTab(mapTab);
+        tabGroup.addTab(optionsTab);
 
         return tabGroup;
     };

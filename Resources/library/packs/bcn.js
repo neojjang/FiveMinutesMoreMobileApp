@@ -2,12 +2,17 @@
 var db = Titanium.Database.open('FiveMinutesMoreDb');
 
 // Categories Table
-db.execute('INSERT INTO categories (id, name, description, logo) VALUES (?, ?, ?, ?)', 1, 'S1', 'Pl. Catalunya - Terrassa', 's1.gif');
-db.execute('INSERT INTO categories (id, name, description, logo) VALUES (?, ?, ?, ?)', 2, 'S2', 'Pl. Catalunya  - Sabadell Rambla', 's2.gif');
-db.execute('INSERT INTO categories (id, name, description, logo) VALUES (?, ?, ?, ?)', 5, 'S5', 'Pl. Catalunya - Sant Cugat / Rubí', 's5.gif');
-db.execute('INSERT INTO categories (id, name, description, logo) VALUES (?, ?, ?, ?)', 6, 'S55', 'Pl. Catalunya - Universitat Autonoma', 's55.gif');
-db.execute('INSERT INTO categories (id, name, description, logo) VALUES (?, ?, ?, ?)', 8, 'L6', 'Pl. Catalunya - Reina Elisenda', 'l6.gif');
-db.execute('INSERT INTO categories (id, name, description, logo) VALUES (?, ?, ?, ?)', 9, 'L7', 'Pl. Catalunya - Av. Tibidabo', 'l7.gif');
+db.execute('INSERT INTO categories (id, name, description, logo, parent_id) VALUES (?, ?, ?, ?, ?)', 1, 'S1', 'Pl. Catalunya - Terrassa', 's1.gif', 100);
+db.execute('INSERT INTO categories (id, name, description, logo, parent_id) VALUES (?, ?, ?, ?, ?)', 2, 'S2', 'Pl. Catalunya  - Sabadell Rambla', 's2.gif', 100);
+db.execute('INSERT INTO categories (id, name, description, logo, parent_id) VALUES (?, ?, ?, ?, ?)', 5, 'S5', 'Pl. Catalunya - Sant Cugat / Rubí', 's5.gif', 100);
+db.execute('INSERT INTO categories (id, name, description, logo, parent_id) VALUES (?, ?, ?, ?, ?)', 6, 'S55', 'Pl. Catalunya - Universitat Autonoma', 's55.gif', 100);
+db.execute('INSERT INTO categories (id, name, description, logo, parent_id) VALUES (?, ?, ?, ?, ?)', 8, 'L6', 'Pl. Catalunya - Reina Elisenda', 'l6.gif', 100);
+db.execute('INSERT INTO categories (id, name, description, logo, parent_id) VALUES (?, ?, ?, ?, ?)', 9, 'L7', 'Pl. Catalunya - Av. Tibidabo', 'l7.gif', 100);
+
+db.execute('INSERT INTO categories (id, name, description, logo, parent_id) VALUES (?, ?, ?, ?, ?)', 100, 'FGC', 'Ferrocarils de la Generalitat', 'train.gif', 0);
+db.execute('INSERT INTO categories (id, name, description, logo, parent_id) VALUES (?, ?, ?, ?, ?)', 110, 'Metro', 'Metro de Barcelona', 'metro.gif', 0);
+db.execute('INSERT INTO categories (id, name, description, logo, parent_id) VALUES (?, ?, ?, ?, ?)', 120, 'Bus', 'Autobuses de Barcelona', 'bus.gif', 0);
+db.execute('INSERT INTO categories (id, name, description, logo, parent_id) VALUES (?, ?, ?, ?, ?)', 130, 'Renfe', 'Cercanías Renfe', 'renfe.gif', 0);
 
 // Areas Table
 db.execute('INSERT INTO areas (id, name, latitude, longitude) VALUES (?, ?, ?, ?)',  1, 'Pl. Catalunya', 41.3856, 2.1687);

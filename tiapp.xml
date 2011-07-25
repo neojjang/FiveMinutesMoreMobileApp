@@ -7,14 +7,14 @@
         <target device="ipad">false</target>
         <target device="iphone">true</target>
     </deployment-targets>
-    <id>com.quepimquepam.gpsalarm</id>
-    <name>GSP Alarm</name>
-    <version>1.0</version>
-    <publisher>QuePimQuePam.com</publisher>
-    <url>http://www.quepimquepam.com</url>
-    <description>Sleep on the train without missing your stop</description>
-    <copyright>QuePimQuePam Development, S.L.</copyright>
-    <icon>map_logo.png</icon>
+<id>com.quepimquepam.fiveminutesmore</id>
+<name>FiveMinutesMore</name>
+<version>1.0</version>
+<publisher>QuePimQuePam.com</publisher>
+<url>http://www.quepimquepam.com</url>
+<description>Sleep on the train without missing your stop</description>
+<copyright>QuePimQuePam Development, S.L.</copyright>
+<icon>default_app_logo.png</icon>
     <persistent-wifi>false</persistent-wifi>
     <prerendered-icon>false</prerendered-icon>
     <statusbar-style>black</statusbar-style>
